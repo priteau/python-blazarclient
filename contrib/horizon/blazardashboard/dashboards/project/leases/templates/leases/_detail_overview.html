@@ -53,6 +53,7 @@
     <dt>{{ reservation.resource_type }}</dt>
     <dd>
       <ul>
+        <li><em>{% trans "Id:" %}</em>&nbsp;{{ reservation.id|default:_("None") }}
         <li><em>{% trans "Status:" %}</em>&nbsp;{{ reservation.status|replace_underscores|lower|capfirst }}</li>
         <li><em>{% trans "Resource Id:" %}</em>&nbsp;{{ reservation.resource_id }}</li>
         <li><em>{% trans "Created at:" %}</em>&nbsp;{{ reservation.created_at|parse_isotime|date:"Y-m-d H:i T"|default:"-" }}</li>
