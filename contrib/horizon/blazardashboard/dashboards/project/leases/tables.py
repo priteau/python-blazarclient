@@ -19,6 +19,8 @@ from django.utils.translation import ugettext_lazy as _
 from horizon import tables
 from horizon.utils import filters
 
+from functools import partial
+
 from blazardashboard import api
 
 class CreateLease(tables.LinkAction):
@@ -65,10 +67,10 @@ class LeasesTable(tables.DataTable):
                          link="horizon:project:leases:detail",)
     start_date = tables.Column("start_date", verbose_name=_("Start date"),
                                filters=(filters.parse_isotime,
-                                        django_filters.date),)
+                                        partial(django_filters.date, arg='Y-m-d H:i T')),)
     end_date = tables.Column("end_date", verbose_name=_("End date"),
                              filters=(filters.parse_isotime,
-                                      django_filters.date))
+                                      partial(django_filters.date, arg='Y-m-d H:i T')),)
     action = tables.Column("action", verbose_name=_("Action"),)
     status = tables.Column("status", verbose_name=_("Status"),)
     status_reason = tables.Column("status_reason", verbose_name=_("Reason"),)
