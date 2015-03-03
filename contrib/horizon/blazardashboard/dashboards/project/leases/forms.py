@@ -15,12 +15,81 @@
 
 
 from django.utils.translation import ugettext_lazy as _
+from datetime import datetime
 
 from horizon import exceptions
 from horizon import forms
 from horizon import messages
 
 from blazardashboard import api
+
+
+class CreateForm(forms.SelfHandlingForm):
+
+    class Meta:
+        name = _('Create New Lease')
+
+    name = forms.CharField(
+        label=_('Name'),
+        widget=forms.TextInput()
+    )
+    start_date = forms.DateTimeField(
+        label=_('Start Date/Time (UTC)'),
+        help_text=_('Enter date/time in UTC with the format Y-M-D h:m'),
+        error_messages={
+            'invalid': _('Value should be UTC date/time, formatted Y-M-D h:m'),
+        },
+        input_formats=['%Y-%m-%d %H:%M'],
+        widget=forms.DateTimeInput(attrs={'placeholder':'yyyy-mm-dd hh:mm'}),
+    )
+    end_date = forms.DateTimeField(
+        label=_('End Date/Time (UTC)'),
+        help_text=_('Enter date/time in UTC with the format Y-M-D h:m'),
+        error_messages={
+            'invalid': _('Value should be UTC date/time, formatted Y-M-D h:m'),
+        },
+        input_formats=['%Y-%m-%d %H:%M'],
+        widget=forms.DateTimeInput(attrs={'placeholder':'yyyy-mm-dd hh:mm'}),
+    )
+    resource_type = forms.ChoiceField(
+        label=_('Resource Type'),
+        choices=(
+            ('physical:host', _('Physical Host')),
+        )
+    )
+    hosts = forms.IntegerField(
+        label=_('Number of Hosts'),
+        min_value=1,
+        initial=1
+    )
+
+    def __init__(self, *args, **kwargs):
+        super(CreateForm, self).__init__(*args, **kwargs)
+
+    def handle(self, request, data):
+        try:
+            name = data['name']
+            start = data['start_date'].strftime('%Y-%m-%d %H:%M')
+            end = data['end_date'].strftime('%Y-%m-%d %H:%M')
+            reservations = [
+                {
+                    'min': data['hosts'],
+                    'max': data['hosts'],
+                    'hypervisor_properties': '',
+                    'resource_properties': '',
+                    'resource_type': data['resource_type'],
+                }
+            ]
+            events = []
+            lease = api.blazar.lease_create(request, name, start, end, reservations, events)
+
+            # store created_lease_id in session for redirect in view
+            request.session['created_lease_id'] = lease.id
+
+            messages.success(request, _("Lease created successfully."))
+            return True
+        except Exception as e:
+            exceptions.handle(request)
 
 
 class UpdateForm(forms.SelfHandlingForm):

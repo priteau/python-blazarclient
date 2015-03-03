@@ -48,6 +48,18 @@ class DetailView(tabs.TabView):
     template_name = 'project/leases/detail.html'
 
 
+class CreateView(forms.ModalFormView):
+    form_class = project_forms.CreateForm
+    template_name = 'project/leases/create.html'
+
+    def get_success_url(self):
+        if 'created_lease_id' in self.request.session:
+            lease_id = self.request.session.pop('created_lease_id')
+            return reverse('horizon:project:leases:detail', args=[lease_id])
+
+        return reverse('horizon:project:leases:index')
+
+
 class UpdateView(forms.ModalFormView):
     form_class = project_forms.UpdateForm
     template_name = 'project/leases/update.html'

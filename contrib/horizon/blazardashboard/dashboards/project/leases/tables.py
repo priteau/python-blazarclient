@@ -21,6 +21,18 @@ from horizon.utils import filters
 
 from blazardashboard import api
 
+class CreateLease(tables.LinkAction):
+    name = "create"
+    verbose_name = _("Create Lease")
+    url = "horizon:project:leases:create"
+    classes = ("btn-create", "btn-primary", "ajax-modal", )
+    icon = "plus"
+    ajax = True
+
+    def __init__(self, attrs=None, **kwargs):
+        kwargs['preempt'] = True
+        super(CreateLease, self).__init__(attrs, **kwargs)
+
 
 class UpdateLease(tables.LinkAction):
     name = "update"
@@ -64,5 +76,5 @@ class LeasesTable(tables.DataTable):
     class Meta:
         name = "leases"
         verbose_name = _("Leases")
-        table_actions = (DeleteLease,)
-        row_actions = (UpdateLease, DeleteLease)
+        table_actions = (CreateLease, DeleteLease, )
+        row_actions = (UpdateLease, DeleteLease, )

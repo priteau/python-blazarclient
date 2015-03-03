@@ -63,6 +63,10 @@ def lease_get(request, lease_id):
     lease = blazarclient(request).lease.get(lease_id)
     return Lease(lease)
 
+def lease_create(request, name, start, end, reservations, events):
+    """Create a lease."""
+    lease = blazarclient(request).lease.create(name, start, end, reservations, events)
+    return Lease(lease)
 
 def lease_update(request, lease_id, **kwargs):
     """Update a lease."""
