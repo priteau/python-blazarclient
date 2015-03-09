@@ -122,10 +122,21 @@ class UpdateForm(forms.SelfHandlingForm):
 
     def handle(self, request, data):
         lease_id = data.get('lease_id')
+
+        # If prolong_for is just an empty string it will invert the meaning of
+        # reduce_by. Make sure empty strings are replaced by None.
+        prolong_for = data.get('prolong_for', None)
+        if not prolong_for:
+            prolong_for = None
+
+        reduce_by = data.get('reduce_by', None)
+        if not reduce_by:
+            reduce_by = None
+
         fields = {
             'name': data.get('name'),
-            'prolong_for': data.get('prolong_for', None),
-            'reduce_by': data.get('reduce_by', None),
+            'prolong_for': prolong_for,
+            'reduce_by': reduce_by,
         }
 
         try:
