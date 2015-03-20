@@ -19,6 +19,8 @@ from climateclient import client as blazar_client
 
 from openstack_dashboard.api import base
 
+from django.db import connections
+
 LOG = logging.getLogger(__name__)
 LEASE_DATE_FORMAT = "%Y-%m-%d %H:%M"
 
@@ -79,3 +81,27 @@ def lease_update(request, lease_id, **kwargs):
 def lease_delete(request, lease_id):
     """Delete a lease."""
     blazarclient(request).lease.delete(lease_id)
+
+def dictfetchall(cursor):
+    "Returns all rows from a cursor as a dict"
+    desc = cursor.description
+    return [
+        dict(zip([col[0] for col in desc], row))
+        for row in cursor.fetchall()
+    ]
+
+def compute_host_list(request):
+    """Return a list of compute hosts available for reservation"""
+    cursor = connections['blazar'].cursor()
+    cursor.execute('SELECT hypervisor_hostname, vcpus, memory_mb, local_gb, cpu_info, hypervisor_type FROM computehosts')
+    compute_hosts = dictfetchall(cursor)
+
+    return compute_hosts
+
+def reservation_calendar(request):
+    """Return a list of all scheduled leases."""
+    cursor = connections['blazar'].cursor()
+    cursor.execute('SELECT l.project_id, l.start_date, l.end_date, r.id, r.status, c.hypervisor_hostname FROM computehost_allocations cha JOIN computehosts c ON c.id = cha.compute_host_id JOIN reservations r ON r.id = cha.reservation_id JOIN leases l ON l.id = r.lease_id ORDER BY start_date, project_id')
+    host_reservations = dictfetchall(cursor)
+
+    return host_reservations

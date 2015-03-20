@@ -14,15 +14,19 @@
 #    under the License.
 
 import logging
+import json
 
+from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
+from django.http import HttpResponse
 
 from horizon import exceptions
 from horizon import forms
 from horizon import tables
 from horizon import tabs
+from horizon import views
 from horizon.utils import memoized
 
 from blazardashboard import api
@@ -41,6 +45,18 @@ class IndexView(tables.DataTableView):
     def get_data(self):
         leases = api.blazar.lease_list(self.request)
         return leases
+
+
+class CalendarView(views.APIView):
+    template_name = 'project/leases/calendar.html'
+
+
+def calendar_data_view(request):
+    data = {}
+    data['compute_hosts'] = api.blazar.compute_host_list(request)
+    data['reservations'] = api.blazar.reservation_calendar(request)
+
+    return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), content_type="application/json")
 
 
 class DetailView(tabs.TabView):

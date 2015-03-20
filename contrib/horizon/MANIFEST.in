@@ -1,3 +1,3 @@
-recursive-include blazardashboard *.html *.js *.less *.mo *.po *.example *.eot *.svg *.ttf *.woff *.png *.ico *.wsgi *.gif *.csv *.template
+recursive-include blazardashboard *.html *.js *.less *.scss *.css *.mo *.po *.example *.eot *.svg *.ttf *.woff *.png *.ico *.wsgi *.gif *.csv *.template
 
 include README.rst

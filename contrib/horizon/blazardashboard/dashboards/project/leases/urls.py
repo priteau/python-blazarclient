@@ -22,6 +22,8 @@ from blazardashboard.dashboards.project.leases import views as leases_views
 urlpatterns = patterns(
     '',
     url(r'^$', leases_views.IndexView.as_view(), name='index'),
+    url(r'^calendar/$', leases_views.CalendarView.as_view(), name='calendar'),
+    url(r'^calendar.json$', 'blazardashboard.dashboards.project.leases.views.calendar_data_view', name='calendar_data'),
     url(r'^create/$', leases_views.CreateView.as_view(), name='create'),
     url(r'^(?P<lease_id>[^/]+)/$', leases_views.DetailView.as_view(),
         name='detail'),
