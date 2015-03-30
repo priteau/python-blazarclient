@@ -124,8 +124,8 @@ class UpdateForm(forms.SelfHandlingForm):
         lease_id = data.get('lease_id')
         fields = {
             'name': data.get('name'),
-            'prolong_for': data.get('prolong_for', None),
-            'reduce_by': data.get('reduce_by', None),
+            'prolong_for': data.get('prolong_for', None) or None,
+            'reduce_by': data.get('reduce_by', None) or None,
         }
 
         try:
