@@ -43,6 +43,14 @@ class UpdateLease(tables.LinkAction):
     classes = ("btn-create", "ajax-modal")
 
 
+class ViewLeaseCalendar(tables.LinkAction):
+    name = "calendar"
+    verbose_name = _("Lease Calendar")
+    url = "horizon:project:leases:calendar"
+    classes = ("btn-default", )
+    icon = "calendar"
+
+
 class DeleteLease(tables.BatchAction):
     name = "delete"
     action_present = _("Delete")
@@ -78,5 +86,5 @@ class LeasesTable(tables.DataTable):
     class Meta:
         name = "leases"
         verbose_name = _("Leases")
-        table_actions = (CreateLease, DeleteLease, )
+        table_actions = (ViewLeaseCalendar, CreateLease, DeleteLease, )
         row_actions = (UpdateLease, DeleteLease, )

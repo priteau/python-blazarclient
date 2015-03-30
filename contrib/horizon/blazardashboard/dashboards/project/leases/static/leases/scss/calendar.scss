@@ -2,3 +2,42 @@
   width: 100%;
   min-height: 800px;
 }
+
+.tooltip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 300px;
+}
+
+.tooltip-content {
+  box-sizing: border-box;
+  background-color: #eee;
+  border: 1px solid #ccc;
+  padding: 3px;
+}
+
+rect.task {
+  opacity: 0.9;
+}
+
+rect.task-hover {
+  stroke: yellow;
+}
+
+line.time-now {
+  stroke: #A8DE52;
+  stroke-width: 3;
+}
+
+.grid .tick {
+  stroke: rgba(#000, 0.25);
+}
+
+.axis line,
+.axis path {
+  fill: none;
+  stroke: #000;
+  stroke-width: 2;
+  shape-rendering: crispEdges;
+}

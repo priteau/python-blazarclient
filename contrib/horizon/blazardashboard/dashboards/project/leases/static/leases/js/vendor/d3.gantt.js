@@ -3,9 +3,7 @@
  * @version 2.1
  */
 
-d3.gantt = function() {
-  var FIT_TIME_DOMAIN_MODE = "fit";
-  var FIXED_TIME_DOMAIN_MODE = "fixed";
+d3.gantt = function(options) {
 
   var margin = {
     top: 20,
@@ -13,16 +11,17 @@ d3.gantt = function() {
     bottom: 20,
     left: 150
   };
-  var timeDomainStart = d3.time.day.offset(new Date(), -3);
-  var timeDomainEnd = d3.time.hour.offset(new Date(), +3);
-  var timeDomainMode = FIT_TIME_DOMAIN_MODE; // fixed or fit
-  var taskTypes = [];
-  var taskStatus = [];
-  var el = document.getElementById("blazar-gantt");
+
+  var timeDomainStart = options.timeDomainStart || d3.time.hour.offset(new Date(), -3);
+  timeDomainStart.setMinutes(0, 0, 0);
+  var timeDomainEnd = options.timeDomainEnd || d3.time.day.offset(timeDomainStart, +1);
+  var taskTypes = options.taskTypes || [];
+  var taskStatus = options.taskStatus || [];
+  var selector = options.selector || '#d3-gantt';
+  var el = document.querySelector(selector);
   var height = el.clientHeight - margin.top - margin.bottom - 5;
   var width = el.clientWidth - margin.right - margin.left - 5;
-
-  var tickFormat = "%H:%M";
+  var tickFormat = options.tickFormat || "%H:%M";
 
   var keyFunction = function(d) {
     return d.startDate + d.taskName + d.endDate;
@@ -32,78 +31,93 @@ d3.gantt = function() {
     return "translate(" + x(d.startDate) + "," + y(d.taskName) + ")";
   };
 
-  var x = d3.time.scale().domain([timeDomainStart, timeDomainEnd]).range([0,
-    width
-  ]).clamp(true);
+  var x;
+  var y;
+  var xAxis;
+  var yAxis;
+  var gridX;
 
-  var y = d3.scale.ordinal().domain(taskTypes).rangeRoundBands([0, height -
-    margin.top - margin.bottom
-  ], .1);
+  var tooltip = d3.select(selector).append("div").attr("class", "tooltip").style("opacity", 0);
 
-  var xAxis = d3.svg.axis().scale(x).orient("bottom").tickFormat(d3.time.format(
-      tickFormat)).tickSubdivide(true)
-    .tickSize(8).tickPadding(8);
+  var makeXAxis = function makeXGrid() {
+    return d3.svg.axis().scale(x).orient("bottom");
+  };
 
-  var yAxis = d3.svg.axis().scale(y).orient("left").tickSize(0);
-
-  var initTimeDomain = function(tasks) {
-    if (timeDomainMode === FIT_TIME_DOMAIN_MODE) {
-      if (tasks === undefined || tasks.length < 1) {
-        timeDomainStart = d3.time.day.offset(new Date(), -3);
-        timeDomainEnd = d3.time.hour.offset(new Date(), +3);
-        return;
-      }
-      tasks.sort(function(a, b) {
-        return a.endDate - b.endDate;
-      });
-      timeDomainEnd = tasks[tasks.length - 1].endDate;
-      tasks.sort(function(a, b) {
-        return a.startDate - b.startDate;
-      });
-      timeDomainStart = tasks[0].startDate;
-    }
+  var makeYAxis = function makeYAxis() {
+    return d3.svg.axis().scale(y).orient("left");
   };
 
   var initAxis = function() {
-    x = d3.time.scale().domain([timeDomainStart, timeDomainEnd]).range([0,
-      width
-    ]).clamp(true);
-    y = d3.scale.ordinal().domain(taskTypes).rangeRoundBands([0, height -
-      margin.top - margin.bottom
-    ], .1);
-    xAxis = d3.svg.axis().scale(x).orient("bottom").tickFormat(d3.time.format(
-        tickFormat)).tickSubdivide(true)
-      .tickSize(8).tickPadding(8);
-
-    yAxis = d3.svg.axis().scale(y).orient("left").tickSize(0);
+    x = d3.time.scale().domain([timeDomainStart, timeDomainEnd]).range([0, width]).clamp(true);
+    y = d3.scale.ordinal().domain(taskTypes).rangeRoundBands([0, height - margin.top - margin.bottom], .1);
+    xAxis = makeXAxis().tickFormat(d3.time.format(tickFormat));
+    yAxis = makeYAxis().tickFormat(function(d) {
+      return d.split('-')[0] + '...';
+    });
+    gridX = makeXAxis().tickSize(-height + margin.top + margin.bottom, 0, 0).tickFormat('');
   };
 
-  function gantt(tasks) {
+  function tooltipContent(d) {
+    var fmt = d3.time.format('%d-%b %H:%M');
+    return '<div class="tooltip-content"><dl><dt>Project</dt><dd>'
+      + d.data.project_id
+      + '</dd><dt>Hosts</dt><dd>'
+      + d.data.hosts.join('<br>')
+      + '</dd><dt>Reserved</dt><dd>'
+      + fmt(d.startDate) + ' - ' + fmt(d.endDate)
+      + '</dd></dl></div>';
+  }
 
-    initTimeDomain(tasks);
+  function gantt(tasks) {
     initAxis();
 
-    var svg = d3.select("#blazar-gantt")
+    var svg = d3.select(selector)
       .append("svg")
       .attr("class", "chart")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
-      .attr("class", "gantt-chart")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+        .attr("class", "gantt-chart")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+
+    /* gridlines */
+    svg.append('g')
+      .attr('class', 'grid')
+      .attr("transform", "translate(0," + (height - margin.top - margin.bottom) + ")")
+      .call(gridX);
+
+    /* now */
+    var now = new Date();
+    svg.append("line")
+      .attr("class", "time-now")
+      .attr("x1", x(now))
+      .attr("y1", 0)
+      .attr("x2", x(now))
+      .attr("y2", height - margin.top - margin.bottom);
+
+    /* reservation data */
+    var colors = d3.scale.category20();
+
+    var reservationColors = {};
 
     svg.selectAll(".chart")
       .data(tasks, keyFunction).enter()
       .append("rect")
-      .attr("rx", 5)
-      .attr("ry", 5)
-      .attr("class", function(d) {
-        if (taskStatus[d.status] == null) {
-          return "bar";
+      .attr("fill", function(d, i) {
+        if (! reservationColors[d.data.id]) {
+          reservationColors[d.data.id] = colors(Object.keys(reservationColors).length);
         }
-        return taskStatus[d.status];
+        return reservationColors[d.data.id];
+      })
+      .attr("class", function(d) {
+        var value = 'task task-' + d.data.id;
+
+        if (taskStatus[d.status]) {
+          value += ' task-' + d.status;
+        }
+        return value;
       })
       .attr("y", 0)
       .attr("transform", rectTransform)
@@ -112,13 +126,28 @@ d3.gantt = function() {
       })
       .attr("width", function(d) {
         return (x(d.endDate) - x(d.startDate));
+      })
+      .on("mouseover", function(d) {
+        d3.selectAll('.task-'+d.data.id).classed('task-hover', true);
+        tooltip.transition().duration(200).style("opacity", 1);
+        tooltip.html(tooltipContent(d))
+          .style("left", (d3.event.pageX) + "px")
+          .style("top", (d3.event.pageY) + "px");
+      })
+      .on("mouseout", function(d) {
+        d3.selectAll('.task-'+d.data.id).classed('task-hover', false);
+        tooltip.transition().duration(200).style("opacity", 0);
+      })
+      .on("mousemove", function() {
+        tooltip
+          .style("left", (d3.event.pageX + 25) + "px")
+          .style("top", (d3.event.pageY - 25) + "px");
       });
 
-
+    /* axes */
     svg.append("g")
       .attr("class", "x axis")
-      .attr("transform", "translate(0, " + (height - margin.top - margin.bottom) +
-        ")")
+      .attr("transform", "translate(0, " + (height - margin.top - margin.bottom) + ")")
       .transition()
       .call(xAxis);
 
@@ -129,22 +158,31 @@ d3.gantt = function() {
   };
 
   gantt.redraw = function(tasks) {
+    height = el.clientHeight - margin.top - margin.bottom - 5;
+    width = el.clientWidth - margin.right - margin.left - 5;
 
-    initTimeDomain(tasks);
     initAxis();
 
     var svg = d3.select("svg");
 
+    /* gridlines */
+    svg.select('.grid').transition().call(gridX);
+
+    /* now */
+    var now = new Date();
+    svg.select(".time-now").transition()
+      .attr("x1", x(now))
+      .attr("x2", x(now));
+
+    /* data */
     var ganttChartGroup = svg.select(".gantt-chart");
     var rect = ganttChartGroup.selectAll("rect").data(tasks, keyFunction);
 
     rect.enter()
       .insert("rect", ":first-child")
-      .attr("rx", 5)
-      .attr("ry", 5)
       .attr("class", function(d) {
         if (taskStatus[d.status] == null) {
-          return "bar";
+          return "task";
         }
         return taskStatus[d.status];
       })
@@ -169,6 +207,7 @@ d3.gantt = function() {
 
     rect.exit().remove();
 
+    /* axes */
     svg.select(".x").transition().call(xAxis);
     svg.select(".y").transition().call(yAxis);
 
@@ -185,21 +224,9 @@ d3.gantt = function() {
   gantt.timeDomain = function(value) {
     if (!arguments.length)
       return [timeDomainStart, timeDomainEnd];
-    timeDomainStart = +value[0], timeDomainEnd = +value[1];
+    timeDomainStart = +value[0];
+    timeDomainEnd = +value[1];
     return gantt;
-  };
-
-  /**
-   * @param {string}
-   *                vale The value can be "fit" - the domain fits the data or
-   *                "fixed" - fixed domain.
-   */
-  gantt.timeDomainMode = function(value) {
-    if (!arguments.length)
-      return timeDomainMode;
-    timeDomainMode = value;
-    return gantt;
-
   };
 
   gantt.taskTypes = function(value) {
@@ -236,8 +263,6 @@ d3.gantt = function() {
     tickFormat = value;
     return gantt;
   };
-
-
 
   return gantt;
 };

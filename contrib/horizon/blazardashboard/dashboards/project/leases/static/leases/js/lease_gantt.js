@@ -2,15 +2,27 @@
   'use strict';
 
   function init() {
+    var gantt;
+    var tasks;
+    var form;
+
     $.getJSON('/project/leases/calendar.json')
     .then(function(resp) {
-      var tasks = $.map(resp.reservations, function(reservation, i) {
+
+      tasks = resp.reservations.map(function(reservation, i) {
+        reservation.hosts = resp.reservations.filter(
+          function(r) {
+            return r.id === this.id;
+          },
+          reservation
+        ).map(function(h) { return h.hypervisor_hostname; });
+
         return {
           'startDate': new Date(reservation.start_date),
           'endDate': new Date(reservation.end_date),
           'taskName': reservation.hypervisor_hostname,
           'status': reservation.status,
-          'project': reservation.project_id
+          'data': reservation
         }
       });
 
@@ -19,23 +31,76 @@
         'pending': 'task-pending'
       };
 
-      var taskNames = $.map(resp.compute_hosts, function(host, i) { return host.hypervisor_hostname; });
-
-      tasks.sort(function(t0, t1) {
-        return t0.endDate - t1.endDate;
+      var taskNames = $.map(resp.compute_hosts, function(host, i) {
+        return host.hypervisor_hostname;
       });
 
-      var maxDate = tasks[tasks.length - 1].endDate;
-      var minDate = tasks[0].startDate;
+      var format = '%d-%b %H:%M';
 
-      var format = '%H:%M';
-
-      var gantt = d3.gantt().taskTypes(taskNames).taskStatus(taskStatus).tickFormat(format);
-
+      gantt = d3.gantt({
+        selector:'#blazar-gantt',
+        taskTypes: taskNames,
+        taskStatus: taskStatus,
+        tickFormat: format
+      });
       gantt(tasks);
+
+      /* set initial time range */
+      setTimeDomain(gantt.timeDomain());
+    });
+
+    function setTimeDomain(timeDomain) {
+      form.removeClass('time-domain-processed');
+      $('#dateStart').datepicker('setDate', timeDomain[0]);
+      $('#timeStartHours').val(timeDomain[0].getHours());
+      $('#timeStartMinutes').val(timeDomain[0].getMinutes());
+      $('#dateEnd').datepicker('setDate', timeDomain[1]);
+      $('#timeEndHours').val(timeDomain[1].getHours());
+      $('#timeEndMinutes').val(timeDomain[1].getMinutes());
+      form.addClass('time-domain-processed');
+    }
+
+    function getTimeDomain() {
+      var timeDomain = [
+        $('#dateStart').datepicker('getDate'),
+        $('#dateEnd').datepicker('getDate')
+      ];
+
+      timeDomain[0].setHours($('#timeStartHours').val());
+      timeDomain[0].setMinutes($('#timeStartMinutes').val());
+      timeDomain[1].setHours($('#timeEndHours').val());
+      timeDomain[1].setMinutes($('#timeEndMinutes').val());
+
+      return timeDomain;
+    }
+
+    function redraw() {
+      if (gantt && tasks) {
+        gantt.redraw(tasks);
+      }
+    }
+
+    $(window).on('resize', redraw);
+
+    form = $('form[name="blazar-gantt-controls"]');
+
+    $('input[data-datepicker]', form).datepicker({
+      dateFormat: 'mm/dd/yyyy'
+    });
+
+    $('input', form).on('change', function() {
+      if (form.hasClass('time-domain-processed')) {
+        var timeDomain = getTimeDomain();
+        if (timeDomain[0] >= timeDomain[1]) {
+          timeDomain[1] = d3.time.day.offset(timeDomain[0], +1);
+          setTimeDomain(timeDomain);
+        }
+        gantt.timeDomain(timeDomain);
+        redraw();
+      }
     });
   }
 
   horizon.addInitFunction(init);
 
-})(this, horizon, jQuery);
+})(window, horizon, jQuery);
