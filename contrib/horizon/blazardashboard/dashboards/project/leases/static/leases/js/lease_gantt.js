@@ -6,7 +6,7 @@
     var tasks;
     var form;
 
-    $.getJSON('calendar.json')
+    $.getJSON('../calendar.json')
     .then(function(resp) {
 
       tasks = resp.reservations.map(function(reservation, i) {
