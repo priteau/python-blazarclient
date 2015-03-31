@@ -14,9 +14,9 @@
     <dt>{% trans "Project Id" %}</dt>
     <dd>{{ lease.project_id|default:_("None") }}</dd>
     <dt>{% trans "Start date" %}</dt>
-    <dd>{{ lease.start_date|parse_isotime|date:"Y-m-d H:i T"|default:"-" }}</dd>
+    <dd>{{ lease.start_date|date:"Y-m-d H:i T"|default:"-" }}</dd>
     <dt>{% trans "End date" %}</dt>
-    <dd>{{ lease.end_date|parse_isotime|date:"Y-m-d H:i T"|default:"-" }}</dd>
+    <dd>{{ lease.end_date|date:"Y-m-d H:i T"|default:"-" }}</dd>
     <dt>{% trans "Action" %}</dt>
     <dd>{{ lease.action|default:"-" }}</dd>
     <dt>{% trans "Status" %}</dt>
@@ -35,8 +35,8 @@
     <dd>
       <ul>
         <li><em>{% trans "Status:" %}</em>&nbsp;{{ event.status|replace_underscores|lower|capfirst }}</li>
-        <li><em>{% trans "Created at:" %}</em>&nbsp;{{ event.created_at|parse_isotime|date:"Y-m-d H:i T"|default:"-" }}</li>
-        <li><em>{% trans "Updated at:" %}</em>&nbsp;{{ event.updated_at|parse_isotime|date:"Y-m-d H:i T"|default:"-" }}</li>
+        <li><em>{% trans "Created at:" %}</em>&nbsp;{{ event.created_at|date:"Y-m-d H:i T"|default:"-" }}</li>
+        <li><em>{% trans "Updated at:" %}</em>&nbsp;{{ event.updated_at|date:"Y-m-d H:i T"|default:"-" }}</li>
       </ul>
     </dd>
     {% empty %}
@@ -56,8 +56,8 @@
         <li><em>{% trans "Id:" %}</em>&nbsp;{{ reservation.id|default:_("None") }}
         <li><em>{% trans "Status:" %}</em>&nbsp;{{ reservation.status|replace_underscores|lower|capfirst }}</li>
         <li><em>{% trans "Resource Id:" %}</em>&nbsp;{{ reservation.resource_id }}</li>
-        <li><em>{% trans "Created at:" %}</em>&nbsp;{{ reservation.created_at|parse_isotime|date:"Y-m-d H:i T"|default:"-" }}</li>
-        <li><em>{% trans "Updated at:" %}</em>&nbsp;{{ reservation.updated_at|parse_isotime|date:"Y-m-d H:i T"|default:"-" }}</li>
+        <li><em>{% trans "Created at:" %}</em>&nbsp;{{ reservation.created_at|date:"Y-m-d H:i T"|default:"-" }}</li>
+        <li><em>{% trans "Updated at:" %}</em>&nbsp;{{ reservation.updated_at|date:"Y-m-d H:i T"|default:"-" }}</li>
       </ul>
     </dd>
     {% empty %}
