@@ -34,7 +34,7 @@
     <dt>{{ event.event_type }}</dt>
     <dd>
       <ul>
-        <li><em>{% trans "Status:" %}</em>&nbsp;{{ event.status|replace_underscores|lower|capfirst }}</li>
+        <li><em>{% trans "Status:" %}</em>&nbsp;{{ event.status|lower|capfirst }}</li>
         <li><em>{% trans "Created at:" %}</em>&nbsp;{{ event.created_at|date:"Y-m-d H:i T"|default:"-" }}</li>
         <li><em>{% trans "Updated at:" %}</em>&nbsp;{{ event.updated_at|date:"Y-m-d H:i T"|default:"-" }}</li>
       </ul>
@@ -54,7 +54,7 @@
     <dd>
       <ul>
         <li><em>{% trans "Id:" %}</em>&nbsp;{{ reservation.id|default:_("None") }}
-        <li><em>{% trans "Status:" %}</em>&nbsp;{{ reservation.status|replace_underscores|lower|capfirst }}</li>
+        <li><em>{% trans "Status:" %}</em>&nbsp;{{ reservation.status|lower|capfirst }}</li>
         <li><em>{% trans "Resource Id:" %}</em>&nbsp;{{ reservation.resource_id }}</li>
         <li><em>{% trans "Created at:" %}</em>&nbsp;{{ reservation.created_at|date:"Y-m-d H:i T"|default:"-" }}</li>
         <li><em>{% trans "Updated at:" %}</em>&nbsp;{{ reservation.updated_at|date:"Y-m-d H:i T"|default:"-" }}</li>
