@@ -7,7 +7,7 @@
     var form;
 
     $.getJSON('../calendar.json')
-    .then(function(resp) {
+    .done(function(resp) {
 
       tasks = resp.reservations.map(function(reservation, i) {
         reservation.hosts = resp.reservations.filter(
@@ -36,7 +36,7 @@
       });
 
       var format = '%d-%b %H:%M';
-
+      $('#blazar-gantt').empty();
       gantt = d3.gantt({
         selector:'#blazar-gantt',
         taskTypes: taskNames,
@@ -47,6 +47,9 @@
 
       /* set initial time range */
       setTimeDomain(gantt.timeDomain());
+    })
+    .fail(function() {
+      $('#blazar-gantt').html('<div class="alert alert-danger">Unable to load reservations.</div>');
     });
 
     function setTimeDomain(timeDomain) {
