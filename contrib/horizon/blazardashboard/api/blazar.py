@@ -16,6 +16,7 @@
 import logging
 
 from climateclient import client as blazar_client
+from climateclient import exception as blazar_exception
 
 from openstack_dashboard.api import base
 
@@ -80,7 +81,12 @@ def lease_update(request, lease_id, **kwargs):
 
 def lease_delete(request, lease_id):
     """Delete a lease."""
-    blazarclient(request).lease.delete(lease_id)
+    try:
+        blazarclient(request).lease.delete(lease_id)
+    except blazar_exception.ClimateClientException:
+        # XXX This is temporary until we can display a proper error pop-up in
+        # Horizon instead of an error page
+        pass
 
 def dictfetchall(cursor):
     "Returns all rows from a cursor as a dict"
