@@ -61,6 +61,8 @@ d3.gantt = function(options) {
     var fmt = d3.time.format('%d-%b %H:%M');
     return '<div class="tooltip-content"><dl><dt>Project</dt><dd>'
       + d.data.project_id
+      + '</dd><dt>Name</dt><dd>'
+      + d.data.name
       + '</dd><dt>Hosts</dt><dd>'
       + d.data.hosts.join('<br>')
       + '</dd><dt>Reserved</dt><dd>'
@@ -136,12 +138,26 @@ d3.gantt = function(options) {
       })
       .on("mouseout", function(d) {
         d3.selectAll('.task-'+d.data.id).classed('task-hover', false);
-        tooltip.transition().duration(200).style("opacity", 0);
+        tooltip
+          .transition().duration(200).style("opacity", 0)
+          .each("end", function() {
+            tooltip.style("left", 0).style("top", 0).html('');
+          });
       })
       .on("mousemove", function() {
-        tooltip
-          .style("left", (d3.event.pageX + 25) + "px")
-          .style("top", (d3.event.pageY - 25) + "px");
+        var w0 = d3.select('body').property('clientWidth');
+        var w1 = tooltip.property('clientWidth');
+        var pad = 25;
+        var left;
+        var top;
+        if (d3.event.pageX + w1 < w0) {
+          left = d3.event.pageX + pad;
+          top = d3.event.pageY - pad;
+        } else {
+          left = d3.event.pageX - w1 - pad;
+          top = d3.event.pageY - pad;
+        }
+        tooltip.style("left", left + "px").style("top", top + "px");
       });
 
     /* axes */
