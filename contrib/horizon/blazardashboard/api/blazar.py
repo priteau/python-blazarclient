@@ -107,7 +107,7 @@ def compute_host_list(request):
 def reservation_calendar(request):
     """Return a list of all scheduled leases."""
     cursor = connections['blazar'].cursor()
-    cursor.execute('SELECT l.project_id, l.start_date, l.end_date, r.id, r.status, c.hypervisor_hostname FROM computehost_allocations cha JOIN computehosts c ON c.id = cha.compute_host_id JOIN reservations r ON r.id = cha.reservation_id JOIN leases l ON l.id = r.lease_id ORDER BY start_date, project_id')
+    cursor.execute('SELECT l.name, l.project_id, l.start_date, l.end_date, r.id, r.status, c.hypervisor_hostname FROM computehost_allocations cha JOIN computehosts c ON c.id = cha.compute_host_id JOIN reservations r ON r.id = cha.reservation_id JOIN leases l ON l.id = r.lease_id ORDER BY start_date, project_id')
     host_reservations = dictfetchall(cursor)
 
     return host_reservations
