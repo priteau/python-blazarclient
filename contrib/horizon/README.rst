@@ -21,8 +21,8 @@ Blazar Devstack implementation handles the Blazar Dashboard integration
 Running in Development
 ~~~~~~~~~~~~~~~~~~~~~~
 
-To develop this plugin you need to set up a `development instance
-of Horizon <http://docs.openstack.org/developer/horizon/quickstart.html> `_.
+To develop this plugin you need to `set up a development instance
+of Horizon`_.
 Then, after cloning the `horizon` branch of this repo, install the
 blazar dashboard into the same virtual env:::
 
@@ -66,3 +66,6 @@ The following additional configuration needs to be added to Horizon's
             'PASSWORD': os.environ.get('BLAZAR_DB_PASSWORD', ''),
         }
     }
+
+
+.. _set up a development instance of Horizon: http://docs.openstack.org/developer/horizon/quickstart.html
