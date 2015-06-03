@@ -23,7 +23,7 @@ Running in Development
 
 To develop this plugin you need to `set up a development instance
 of Horizon`_.
-Then, after cloning the `horizon` branch of this repo, install the
+Then, after cloning the ``horizon`` branch of this repo, install the
 blazar dashboard into the same virtual env:::
 
     > git clone https://github.com/ChameleonCloud/python-blazarclient.git
