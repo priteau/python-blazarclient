@@ -17,10 +17,23 @@
 <div class="right">
     <h3>{% trans "Description" %}:</h3>
     <p>{% trans "Create a new lease with the provided values." %}</p>
+    <p>{% trans "Your timezone is currently " %}<b>{{ timezone }}</b>{% trans ". If you need to update your timezone please go to your user settings." %}</p>
+    <p>{% trans "Please note that reservation start and end times will be converted to UTC." %}</p>
 </div>
 {% endblock %}
 
 {% block modal-footer %}
   <input class="btn btn-primary pull-right" type="submit" value="{% trans "Create" %}" />
   <a href="{% url 'horizon:project:leases:index' %}" class="btn secondary cancel close">{% trans "Cancel" %}</a>
+<script type='text/javascript' charset='utf-8'>
+    (function(window, horizon, $, undefined) {
+        'use strict';
+
+        $('.datepicker').datepicker({
+            format: 'yyyy-mm-dd',
+            todayHighlight: true
+        });
+
+    })(window, horizon, jQuery);
+</script>
 {% endblock %}

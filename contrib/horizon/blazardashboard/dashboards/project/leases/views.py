@@ -15,6 +15,7 @@
 
 import logging
 import json
+import pytz
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
@@ -67,6 +68,11 @@ class DetailView(tabs.TabView):
 class CreateView(forms.ModalFormView):
     form_class = project_forms.CreateForm
     template_name = 'project/leases/create.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(CreateView, self).get_context_data(**kwargs)
+        context['timezone'] = pytz.timezone(self.request.session.get('django_timezone', self.request.COOKIES.get('django_timezone', 'UTC')))
+        return context
 
     def get_success_url(self):
         if 'created_lease_id' in self.request.session:
