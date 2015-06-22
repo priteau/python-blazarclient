@@ -36,7 +36,7 @@
       });
 
       var format = '%d-%b %H:%M';
-      $('#blazar-gantt').empty();
+      $('#blazar-gantt').empty().height(20 * taskNames.length);
       gantt = d3.gantt({
         selector:'#blazar-gantt',
         taskTypes: taskNames,
