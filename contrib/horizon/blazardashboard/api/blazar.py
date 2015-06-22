@@ -96,6 +96,32 @@ def dictfetchall(cursor):
         for row in cursor.fetchall()
     ]
 
+def compute_host_available(request, start_date, end_date):
+    """
+    Return the number of compute hosts available for reservation for the entire
+    specified date range.
+    """
+    start_date_str = start_date.strftime('%Y-%m-%d %H:%M')
+    end_date_str = end_date.strftime('%Y-%m-%d %H:%M')
+    cursor = connections['blazar'].cursor()
+    cursor.execute("""
+        select count(*) as available
+        from computehosts ch
+        where ch.id not in (
+            select ch.id
+            from computehosts ch
+            join computehost_allocations cha on cha.`compute_host_id` = ch.`id`
+            join reservations r on r.id = cha.`reservation_id`
+            join leases l on l.`id` = r.`lease_id`
+            where
+                (l.`start_date` > %s and l.`start_date` < %s)
+                or (l.`end_date` > %s and l.`end_date` < %s)
+                or (l.`start_date` < %s and l.`end_date` > %s)
+        )
+        """, [start_date_str, end_date_str, start_date_str, end_date_str, start_date_str, end_date_str])
+    count = cursor.fetchone()[0]
+    return count
+
 def compute_host_list(request):
     """Return a list of compute hosts available for reservation"""
     cursor = connections['blazar'].cursor()
