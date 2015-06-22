@@ -88,17 +88,10 @@ class CreateForm(forms.SelfHandlingForm):
     def handle(self, request, data):
         try:
             name = data['name']
-            start_date = data['start_date']
-            start_date = start_date.replace(hour=data['start_time'].time().hour, minute=data['start_time'].time().minute)
-
-            end_date = data['end_date']
-            end_date = end_date.replace(hour=data['end_time'].time().hour, minute=data['end_time'].time().minute)
-
-            start_date = self.prepare_datetimes(start_date)
-            end_date = self.prepare_datetimes(end_date)
-
-            start = start_date.strftime('%Y-%m-%d %H:%M')
-            end = end_date.strftime('%Y-%m-%d %H:%M')
+            start_datetime = data['start_datetime']
+            end_datetime = data['end_datetime']
+            start = start_datetime.strftime('%Y-%m-%d %H:%M')
+            end = end_datetime.strftime('%Y-%m-%d %H:%M')
 
             reservations = [
                 {
@@ -118,37 +111,52 @@ class CreateForm(forms.SelfHandlingForm):
             messages.success(request, _("Lease created successfully."))
             return True
         except Exception as e:
-            exceptions.handle(request)
+            raise forms.ValidationError("An error occurred while creating this lease: %s. Please try again." % e)
 
     def clean(self):
-        localtz = pytz.timezone(self.request.session.get('django_timezone', self.request.COOKIES.get('django_timezone', 'UTC')))
         cleaned_create_data = super(CreateForm, self).clean()
+
+        # convert dates and times to datetime UTC
         start_date = cleaned_create_data.get("start_date")
+        start_time = cleaned_create_data.get("start_time")
+        start_datetime = self.prepare_datetimes(start_date, start_time)
+
         end_date = cleaned_create_data.get("end_date")
+        end_time = cleaned_create_data.get("end_time")
+        end_datetime = self.prepare_datetimes(end_date, end_time)
 
-        if start_date > end_date:
-            raise forms.ValidationError("Start date must be before end date")
-        if start_date < localtz.localize(datetime.today()):
-            raise forms.ValidationError("Start date must be after today")
+        if start_datetime < datetime.now(pytz.utc):
+            raise forms.ValidationError("Start date must be in the future")
 
+        if start_datetime > end_datetime:
+            raise forms.ValidationError("Start date and time must be before end date and time")
+
+        cleaned_create_data['start_datetime'] = start_datetime
+        cleaned_create_data['end_datetime'] = end_datetime
+
+        # check for name conflicts
         leases = api.blazar.lease_list(self.request)
 
         for lease in leases:
             if lease['name'] == cleaned_create_data.get("name"):
                 raise forms.ValidationError("A lease with this name already exists.")
 
+        # check for host availability
+        num_hosts = api.blazar.compute_host_available(self.request, start_datetime, end_datetime)
+        print num_hosts
+        if cleaned_create_data.get('hosts') > num_hosts:
+            raise forms.ValidationError("Not enough hosts are available for this reservation (%s requested; %s available). Try adjusting the number of hosts requested or the date range for the reservation." % (cleaned_create_data.get('hosts'), num_hosts))
+
         return cleaned_create_data
 
-    # makes sure the datetime has the correct timezone and returns it as UTC
-    def prepare_datetimes(self, date):
+    def prepare_datetimes(self, date_val, time_val):
+        """
+        Ensure the date and time are in user's timezone, then convert to UTC.
+        """
         localtz = pytz.timezone(self.request.session.get('django_timezone', self.request.COOKIES.get('django_timezone', 'UTC')))
-
-        if date.tzinfo == None:
-            date = localtz.localize(date)
-        if date.tzinfo != localtz:
-            date = date.replace(tzinfo=localtz)
-
-        return date.astimezone(pytz.utc)
+        datetime_val = date_val.replace(hour=time_val.time().hour, minute=time_val.time().minute, tzinfo=None)
+        datetime_val = localtz.localize(datetime_val)
+        return datetime_val.astimezone(pytz.utc)
 
 class UpdateForm(forms.SelfHandlingForm):
 
