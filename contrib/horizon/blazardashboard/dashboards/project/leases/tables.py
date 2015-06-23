@@ -23,6 +23,9 @@ from functools import partial
 
 from blazardashboard import api
 
+from datetime import datetime
+import pytz
+
 class CreateLease(tables.LinkAction):
     name = "create"
     verbose_name = _("Create Lease")
@@ -41,6 +44,12 @@ class UpdateLease(tables.LinkAction):
     verbose_name = _("Update Lease")
     url = "horizon:project:leases:update"
     classes = ("btn-create", "ajax-modal")
+
+    def allowed(self, request, lease):
+        print lease.end_date
+        if datetime.strptime(lease.end_date, '%Y-%m-%dT%H:%M:%S.%f').replace(tzinfo=pytz.utc) > datetime.now(pytz.utc):
+            return True
+        return False
 
 
 class ViewLeaseCalendar(tables.LinkAction):
