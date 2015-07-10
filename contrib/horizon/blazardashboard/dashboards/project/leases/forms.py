@@ -76,10 +76,28 @@ class CreateForm(forms.SelfHandlingForm):
             ('physical:host', _('Physical Host')),
         )
     )
-    hosts = forms.IntegerField(
-        label=_('Number of Hosts'),
+    min_hosts = forms.IntegerField(
+        label=_('Minimum Number of Hosts'),
+        help_text=_('Enter the minimum number of hosts to reserve.'),
         min_value=1,
         initial=1
+    )
+    max_hosts = forms.IntegerField(
+        label=_('Maximum Number of Hosts'),
+        help_text=_('Enter the maximum number of hosts to reserve. Enter the same number as the minimum for an exact number.'),
+        min_value=1,
+        initial=1
+    )
+    specific_node = forms.CharField(
+        label=_('Reserve Specific Node'),
+        help_text=_('To reserve a specific node, enter the node UUID here.'),
+        required=False,
+    )
+    ib_support = forms.BooleanField(
+        label=_('Require Infiniband Support'),
+        help_text=_('Reserve only nodes with Infiniband support.'),
+        required=False,
+        initial=False,
     )
 
     def __init__(self, *args, **kwargs):
@@ -95,13 +113,19 @@ class CreateForm(forms.SelfHandlingForm):
 
             reservations = [
                 {
-                    'min': data['hosts'],
-                    'max': data['hosts'],
+                    'min': data['min_hosts'],
+                    'max': data['max_hosts'],
                     'hypervisor_properties': '',
                     'resource_properties': '',
                     'resource_type': data['resource_type'],
                 }
             ]
+
+            if data['ib_support']:
+                reservations[0]['resource_properties'] = '["=", "$network_adapters.4.device", "ib0"]'
+
+            if data['specific_node']:
+                reservations[0]['resource_properties'] = '["=", "$uid", "%s"]' % data['specific_node']
             events = []
             lease = api.blazar.lease_create(request, name, start, end, reservations, events)
 
@@ -111,6 +135,7 @@ class CreateForm(forms.SelfHandlingForm):
             messages.success(request, _("Lease created successfully."))
             return True
         except Exception as e:
+            print e
             raise forms.ValidationError("An error occurred while creating this lease: %s. Please try again." % e)
 
     def clean(self):
@@ -144,8 +169,8 @@ class CreateForm(forms.SelfHandlingForm):
         # check for host availability
         num_hosts = api.blazar.compute_host_available(self.request, start_datetime, end_datetime)
         print num_hosts
-        if cleaned_create_data.get('hosts') > num_hosts:
-            raise forms.ValidationError("Not enough hosts are available for this reservation (%s requested; %s available). Try adjusting the number of hosts requested or the date range for the reservation." % (cleaned_create_data.get('hosts'), num_hosts))
+        if cleaned_create_data.get('min_hosts') > num_hosts:
+            raise forms.ValidationError("Not enough hosts are available for this reservation (minimum %s requested; %s available). Try adjusting the number of hosts requested or the date range for the reservation." % (cleaned_create_data.get('min_hosts'), num_hosts))
 
         return cleaned_create_data
 
