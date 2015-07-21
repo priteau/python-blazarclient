@@ -153,7 +153,7 @@ class CreateForm(forms.SelfHandlingForm):
         if start_datetime < datetime.now(pytz.utc):
             raise forms.ValidationError("Start date must be in the future")
 
-        if start_datetime > end_datetime:
+        if start_datetime >= end_datetime:
             raise forms.ValidationError("Start date and time must be before end date and time")
 
         cleaned_create_data['start_datetime'] = start_datetime
