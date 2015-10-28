@@ -114,9 +114,10 @@ def compute_host_available(request, start_date, end_date):
             join reservations r on r.id = cha.`reservation_id`
             join leases l on l.`id` = r.`lease_id`
             where
-                (l.`start_date` > %s and l.`start_date` < %s)
+                r.deleted="0" and
+                ((l.`start_date` > %s and l.`start_date` < %s)
                 or (l.`end_date` > %s and l.`end_date` < %s)
-                or (l.`start_date` < %s and l.`end_date` > %s)
+                or (l.`start_date` < %s and l.`end_date` > %s))
         )
         """, [start_date_str, end_date_str, start_date_str, end_date_str, start_date_str, end_date_str])
     count = cursor.fetchone()[0]
@@ -133,7 +134,7 @@ def compute_host_list(request):
 def reservation_calendar(request):
     """Return a list of all scheduled leases."""
     cursor = connections['blazar'].cursor()
-    cursor.execute('SELECT l.name, l.project_id, l.start_date, l.end_date, r.id, r.status, c.hypervisor_hostname FROM computehost_allocations cha JOIN computehosts c ON c.id = cha.compute_host_id JOIN reservations r ON r.id = cha.reservation_id JOIN leases l ON l.id = r.lease_id ORDER BY start_date, project_id')
+    cursor.execute('SELECT l.name, l.project_id, l.start_date, l.end_date, r.id, r.status, c.hypervisor_hostname FROM computehost_allocations cha JOIN computehosts c ON c.id = cha.compute_host_id JOIN reservations r ON r.id = cha.reservation_id JOIN leases l ON l.id = r.lease_id WHERE r.deleted="0" ORDER BY start_date, project_id')
     host_reservations = dictfetchall(cursor)
 
     return host_reservations
