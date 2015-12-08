@@ -136,7 +136,7 @@ class CreateForm(forms.SelfHandlingForm):
             return True
         except Exception as e:
             print e
-            raise forms.ValidationError("An error occurred while creating this lease: %s. Please try again." % e)
+            exceptions.handle(request, message="An error occurred while creating this lease: %s. Please try again." % e)
 
     def clean(self):
         cleaned_create_data = super(CreateForm, self).clean()
