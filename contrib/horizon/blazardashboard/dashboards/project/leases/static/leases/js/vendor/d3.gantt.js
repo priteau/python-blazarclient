@@ -133,8 +133,8 @@ d3.gantt = function(options) {
         d3.selectAll('.task-'+d.data.id).classed('task-hover', true);
         tooltip.transition().duration(200).style("opacity", 1);
         tooltip.html(tooltipContent(d))
-          .style("left", (d3.event.pageX) + "px")
-          .style("top", (d3.event.pageY) + "px");
+          .style("left", (d3.event.offsetX) + "px")
+          .style("top", (d3.event.offsetY) + "px");
       })
       .on("mouseout", function(d) {
         d3.selectAll('.task-'+d.data.id).classed('task-hover', false);
@@ -151,11 +151,11 @@ d3.gantt = function(options) {
         var left;
         var top;
         if (d3.event.pageX + w1 < w0) {
-          left = d3.event.pageX + pad;
-          top = d3.event.pageY - pad;
+          left = d3.event.offsetX + pad;
+          top = d3.event.offsetY - pad;
         } else {
-          left = d3.event.pageX - w1 - pad;
-          top = d3.event.pageY - pad;
+          left = d3.event.offsetX - w1 - pad;
+          top = d3.event.offsetY - pad;
         }
         tooltip.style("left", left + "px").style("top", top + "px");
       });
