@@ -1,6 +1,11 @@
 #blazar-gantt {
   width: 100%;
   min-height: 800px;
+  position: relative;
+}
+
+#blazar-gantt .chart {
+  width: inherit;
 }
 
 .tooltip {
