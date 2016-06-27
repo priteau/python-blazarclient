@@ -24,6 +24,10 @@ from horizon import messages
 from blazardashboard import api
 
 import pytz
+import logging
+
+logger = logging.getLogger('horizon')
+
 
 class CreateForm(forms.SelfHandlingForm):
 
@@ -93,11 +97,18 @@ class CreateForm(forms.SelfHandlingForm):
         help_text=_('To reserve a specific node, enter the node UUID here.'),
         required=False,
     )
-    ib_support = forms.BooleanField(
-        label=_('Require Infiniband Support'),
-        help_text=_('Reserve only nodes with Infiniband support.'),
-        required=False,
-        initial=False,
+    node_type = forms.ChoiceField(
+        label=_('Node Type to Reserve'),
+        help_text=_('You can request to reserve nodes with Large Disk, GPU, Storage '
+                    'Hierarchy, or Infiniband Support, or request standard compute '
+                    'nodes.'),
+        choices=(
+            ('default', _('Compute Node (default)')),
+            ('storage_node', _('Storage Node')),
+            ('gpu', _('GPU')),
+            ('ib_support', _('Infiniband Support')),
+            ('storage_hierarchy', _('Storage Hierarchy')),
+        )
     )
 
     def __init__(self, *args, **kwargs):
@@ -121,11 +132,26 @@ class CreateForm(forms.SelfHandlingForm):
                 }
             ]
 
-            if data['ib_support']:
-                reservations[0]['resource_properties'] = '["=", "$network_adapters.4.device", "ib0"]'
+            resource_properties = None
 
-            if data['specific_node']:
-                reservations[0]['resource_properties'] = '["=", "$uid", "%s"]' % data['specific_node']
+            if data['node_type'] == 'storage_node':
+                resource_properties = '["=", "$storage_devices.16.device", "sdq"]'
+
+            elif data['node_type'] == 'gpu':
+                resource_properties = '["=", "$gpu.gpu", "True"]'
+
+            elif data['node_type'] == 'storage_hierarchy':
+                resource_properties = '["=", "$main_memory.ram_size", "549755813888"]'
+
+            elif data['node_type'] == 'ib_support':
+                resource_properties = '["=", "$network_adapters.4.device", "ib0"]'
+
+            elif data['specific_node']:
+                resource_properties = '["=", "$uid", "%s"]' % data['specific_node']
+
+            if resource_properties is not None:
+                reservations[0]['resource_properties'] = resource_properties
+
             events = []
             lease = api.blazar.lease_create(request, name, start, end, reservations, events)
 
@@ -135,7 +161,7 @@ class CreateForm(forms.SelfHandlingForm):
             messages.success(request, _("Lease created successfully."))
             return True
         except Exception as e:
-            print e
+            logger.error('Error submitting lease: %s', e)
             exceptions.handle(request, message="An error occurred while creating this lease: %s. Please try again." % e)
 
     def clean(self):
@@ -168,7 +194,6 @@ class CreateForm(forms.SelfHandlingForm):
 
         # check for host availability
         num_hosts = api.blazar.compute_host_available(self.request, start_datetime, end_datetime)
-        print num_hosts
         if cleaned_create_data.get('min_hosts') > num_hosts:
             raise forms.ValidationError("Not enough hosts are available for this reservation (minimum %s requested; %s available). Try adjusting the number of hosts requested or the date range for the reservation." % (cleaned_create_data.get('min_hosts'), num_hosts))
 
