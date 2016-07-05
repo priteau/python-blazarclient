@@ -5,6 +5,9 @@ Overview
 --------
 OpenStack Reservation Service Horizon integration
 
+This code is not part of the upstream OpenStack python-blazarclient repository.
+It was imported from a patch submitted to OpenStack, and since abandoned: https://review.openstack.org/#/c/100661/
+
 
 Prerequisites
 -------------
