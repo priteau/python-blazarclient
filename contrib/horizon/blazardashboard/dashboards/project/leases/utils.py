@@ -1,5 +1,8 @@
 from blazardashboard.api import blazar
 from django.utils.translation import ugettext_lazy as _
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def reservation_data(request, include_empty_option=False):
@@ -15,12 +18,13 @@ def reservation_data(request, include_empty_option=False):
     """
 
     leases = blazar.lease_list(request)
+    reservations = []
     if leases:
-        reservations = []
         for l in leases:
             reservations += [(r['id'], '{} ({})'.format(l['name'], r['id']))
                              for r in l.reservations if r['status'] == 'active']
 
+    if len(reservations) > 0:
         if include_empty_option:
             return [('', _('Select Reservation')), ] + reservations
         else:
