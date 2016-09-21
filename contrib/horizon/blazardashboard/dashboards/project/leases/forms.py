@@ -135,7 +135,10 @@ class CreateForm(forms.SelfHandlingForm):
 
             resource_properties = None
 
-            if data['node_type'] == 'storage_node':
+            if data['specific_node']:
+                resource_properties = '["=", "$uid", "%s"]' % data['specific_node']
+
+            elif data['node_type'] == 'storage_node':
                 resource_properties = '["=", "$storage_devices.16.device", "sdq"]'
 
             elif data['node_type'] == 'gpu_k80':
@@ -149,9 +152,6 @@ class CreateForm(forms.SelfHandlingForm):
 
             elif data['node_type'] == 'ib_support':
                 resource_properties = '["=", "$network_adapters.4.device", "ib0"]'
-
-            elif data['specific_node']:
-                resource_properties = '["=", "$uid", "%s"]' % data['specific_node']
 
             if resource_properties is not None:
                 reservations[0]['resource_properties'] = resource_properties
