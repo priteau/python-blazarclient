@@ -103,12 +103,19 @@ class CreateForm(forms.SelfHandlingForm):
                     'Hierarchy, or Infiniband Support, or request standard compute '
                     'nodes.'),
         choices=(
-            ('default', _('Compute Node (default)')),
-            ('storage_node', _('Storage Node')),
+           #('default', _('Compute Node (default)')),
+            #('storage_node', _('Storage Node')),
+            #('gpu_k80', _('GPU (K80)')),
+            #('gpu_m40', _('GPU (M40)')),
+            #('ib_support', _('Infiniband Support')),
+            #('storage_hierarchy', _('Storage Hierarchy')),
+            ('compute', _('Compute Node (default)')),
+            ('storage', _('Storage')),
             ('gpu_k80', _('GPU (K80)')),
             ('gpu_m40', _('GPU (M40)')),
-            ('ib_support', _('Infiniband Support')),
+            ('compute_ib', _('Infiniband Support')),
             ('storage_hierarchy', _('Storage Hierarchy')),
+            ('fpga', _('FPGA')),
         )
     )
 
@@ -138,20 +145,32 @@ class CreateForm(forms.SelfHandlingForm):
             if data['specific_node']:
                 resource_properties = '["=", "$uid", "%s"]' % data['specific_node']
 
+            elif data['node_type'] == 'compute':
+                #resource_properties = '["=", "$storage_devices.16.device", "sdq"]'
+                resource_properties = '["=", "$node_type", "compute"]'
+
             elif data['node_type'] == 'storage_node':
-                resource_properties = '["=", "$storage_devices.16.device", "sdq"]'
+                #resource_properties = '["=", "$storage_devices.16.device", "sdq"]'
+                resource_properties = '["=", "$node_type", "storage"]'
 
             elif data['node_type'] == 'gpu_k80':
-                resource_properties = '["=", "$gpu.gpu_model", "K80"]'
+                #resource_properties = '["=", "$gpu.gpu_model", "K80"]'
+                resource_properties = '["=", "$node_type", "gpu_k80"]'
 
             elif data['node_type'] == 'gpu_m40':
-                resource_properties = '["=", "$gpu.gpu_model", "M40"]'
+                #resource_properties = '["=", "$gpu.gpu_model", "M40"]'
+                resource_properties = '["=", "$node_type", "gpu_m40"]'
 
             elif data['node_type'] == 'storage_hierarchy':
-                resource_properties = '["=", "$main_memory.ram_size", "549755813888"]'
+                #resource_properties = '["=", "$main_memory.ram_size", "549755813888"]'
+                resource_properties = '["=", "$node_type", "storage_heirarchy"]'
 
             elif data['node_type'] == 'ib_support':
-                resource_properties = '["=", "$network_adapters.4.device", "ib0"]'
+                #resource_properties = '["=", "$network_adapters.4.device", "ib0"]'
+                resource_properties = '["=", "$node_type", "compute_ib"]'
+
+            elif data['node_type'] == 'fpga':
+                resource_properties = '["=", "$node_type", "fpga"]'
 
             if resource_properties is not None:
                 reservations[0]['resource_properties'] = resource_properties
