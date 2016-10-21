@@ -149,7 +149,7 @@ class CreateForm(forms.SelfHandlingForm):
                 #resource_properties = '["=", "$storage_devices.16.device", "sdq"]'
                 resource_properties = '["=", "$node_type", "compute"]'
 
-            elif data['node_type'] == 'storage_node':
+            elif data['node_type'] == 'storage':
                 #resource_properties = '["=", "$storage_devices.16.device", "sdq"]'
                 resource_properties = '["=", "$node_type", "storage"]'
 
@@ -165,7 +165,7 @@ class CreateForm(forms.SelfHandlingForm):
                 #resource_properties = '["=", "$main_memory.ram_size", "549755813888"]'
                 resource_properties = '["=", "$node_type", "storage_heirarchy"]'
 
-            elif data['node_type'] == 'ib_support':
+            elif data['node_type'] == 'compute_ib':
                 #resource_properties = '["=", "$network_adapters.4.device", "ib0"]'
                 resource_properties = '["=", "$node_type", "compute_ib"]'
 
