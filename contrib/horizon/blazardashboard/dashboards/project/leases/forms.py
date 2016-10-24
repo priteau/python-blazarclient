@@ -98,12 +98,6 @@ class CreateForm(forms.SelfHandlingForm):
         label=_('Reserve Specific Node'),
         help_text=_('To reserve a specific node, enter the node UUID here.'),
         required=False,
-        #auto_id=True
-        #widget=forms.Select(attrs={
-        #    'class': 'switchable',
-        #    'data-switch-off': 'node_type',
-        #    'data-slug': 'specific_node'
-        #})
     )
     node_type = forms.ChoiceField(
         label=_('Node Type to Reserve'),
@@ -126,12 +120,6 @@ class CreateForm(forms.SelfHandlingForm):
             ('storage_hierarchy', _('Storage Hierarchy')),
             ('fpga', _('FPGA')),
         ),
-        #auto_id=True
-        #widget=forms.Select(attrs={
-        #    'class': 'switchable',
-        #    'data-switch-off': 'specific_node',
-        #    'data-slug': 'node_type'
-        #})
     )
 
     def __init__(self, *args, **kwargs):
