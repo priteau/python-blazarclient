@@ -54,6 +54,25 @@
             autoclose: true
         });
 
+        $('#id_specific_node').on('change', function() {
+            if ($(this).val() == '') {
+                $('#id_node_type').show();
+                $('label[for="id_node_type"]').show();
+            } else {
+                $('#id_node_type').hide();
+                $('label[for="id_node_type"]').hide();
+            }
+        });
+
+        $('#id_node_type').on('change', function() {
+             if ($(this).val() == '') {
+                $('#id_specific_node').show();
+                $('label[for="id_specific_node"]').show();
+            } else {
+                $('#id_specific_node').hide();
+                $('label[for="id_specific_node"]').hide();
+            }
+        });
     })(window, horizon, jQuery);
 </script>
 {% endblock %}
