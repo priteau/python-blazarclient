@@ -109,6 +109,7 @@ class CreateForm(forms.SelfHandlingForm):
             #('gpu_m40', _('GPU (M40)')),
             #('ib_support', _('Infiniband Support')),
             #('storage_hierarchy', _('Storage Hierarchy')),
+            ('', _('Select a node type')),
             ('compute', _('Compute Node (default)')),
             ('storage', _('Storage')),
             ('gpu_k80', _('GPU (K80)')),

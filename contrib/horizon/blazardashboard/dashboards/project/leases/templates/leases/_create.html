@@ -15,6 +15,9 @@
 <div class="left">
     <fieldset>
     {% include "horizon/common/_form_fields.html" %}
+        <div class="alert alert-warning">
+            <strong>Node ID and Node Type selection is mutually exclusive.</strong>
+        </div>
     </fieldset>
 </div>
 <div class="right">
@@ -52,6 +55,22 @@
             format: 'yyyy-mm-dd',
             todayHighlight: true,
             autoclose: true
+        });
+
+        $('#id_specific_node').on('change', function() {
+            if ($(this).val() == '') {
+                $('#id_node_type').removeAttr('disabled');
+            } else {
+                $('#id_node_type').attr('disabled','disabled');
+            }
+        });
+
+        $('#id_node_type').on('change', function() {
+             if ($(this).val() == '') {
+                $('#id_specific_node').removeAttr('disabled');
+            } else {
+                $('#id_specific_node').attr('disabled','disabled');
+            }
         });
 
     })(window, horizon, jQuery);
