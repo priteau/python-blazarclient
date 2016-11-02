@@ -57,7 +57,7 @@
             autoclose: true
         });
 
-        $('#id_specific_node').on('change', function() {
+        $('#id_specific_node').on('change keyup paste mouseup', function() {
             if ($(this).val() == '') {
                 $('#id_node_type').removeAttr('disabled');
             } else {
@@ -65,7 +65,7 @@
             }
         });
 
-        $('#id_node_type').on('change', function() {
+        $('#id_node_type').on('change keyup paste mouseup', function() {
              if ($(this).val() == '') {
                 $('#id_specific_node').removeAttr('disabled');
             } else {
