@@ -163,7 +163,7 @@ class CreateForm(forms.SelfHandlingForm):
 
             elif data['node_type'] == 'storage_hierarchy':
                 #resource_properties = '["=", "$main_memory.ram_size", "549755813888"]'
-                resource_properties = '["=", "$node_type", "storage_heirarchy"]'
+                resource_properties = '["=", "$node_type", "storage_hierarchy"]'
 
             elif data['node_type'] == 'compute_ib':
                 #resource_properties = '["=", "$network_adapters.4.device", "ib0"]'
