@@ -95,7 +95,7 @@ class CreateForm(forms.SelfHandlingForm):
     specific_node = forms.CharField(
         label=_('Reserve Specific Node'),
         help_text=_('To reserve a specific node, enter the node UUID here.'),
-        required=False,
+        required=False
     )
     node_type = forms.ChoiceField(
         label=_('Node Type to Reserve'),
@@ -103,12 +103,6 @@ class CreateForm(forms.SelfHandlingForm):
                     'Hierarchy, or Infiniband Support, or request standard compute '
                     'nodes.'),
         choices=(
-           #('default', _('Compute Node (default)')),
-            #('storage_node', _('Storage Node')),
-            #('gpu_k80', _('GPU (K80)')),
-            #('gpu_m40', _('GPU (M40)')),
-            #('ib_support', _('Infiniband Support')),
-            #('storage_hierarchy', _('Storage Hierarchy')),
             ('', _('Select a node type')),
             ('compute', _('Compute Node (default)')),
             ('storage', _('Storage')),
@@ -117,7 +111,8 @@ class CreateForm(forms.SelfHandlingForm):
             ('compute_ib', _('Infiniband Support')),
             ('storage_hierarchy', _('Storage Hierarchy')),
             ('fpga', _('FPGA')),
-        )
+        ),
+        required=False
     )
 
     def __init__(self, *args, **kwargs):
