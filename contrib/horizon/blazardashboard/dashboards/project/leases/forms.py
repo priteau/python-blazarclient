@@ -103,12 +103,6 @@ class CreateForm(forms.SelfHandlingForm):
                     'Hierarchy, or Infiniband Support, or request standard compute '
                     'nodes.'),
         choices=(
-           #('default', _('Compute Node (default)')),
-            #('storage_node', _('Storage Node')),
-            #('gpu_k80', _('GPU (K80)')),
-            #('gpu_m40', _('GPU (M40)')),
-            #('ib_support', _('Infiniband Support')),
-            #('storage_hierarchy', _('Storage Hierarchy')),
             ('compute', _('Compute Node (default)')),
             ('storage', _('Storage')),
             ('gpu_k80', _('GPU (K80)')),
@@ -116,6 +110,8 @@ class CreateForm(forms.SelfHandlingForm):
             ('compute_ib', _('Infiniband Support')),
             ('storage_hierarchy', _('Storage Hierarchy')),
             ('fpga', _('FPGA')),
+            ('lowpower_xeon', _('Low power Xeon')),
+            ('atom', _('Atom')),
         )
     )
 
@@ -171,6 +167,12 @@ class CreateForm(forms.SelfHandlingForm):
 
             elif data['node_type'] == 'fpga':
                 resource_properties = '["=", "$node_type", "fpga"]'
+
+            elif data['node_type'] == 'lowpower_xeon':
+                resource_properties = '["=", "$node_type", "lowpower_xeon"]'
+
+            elif data['node_type'] == 'atom':
+                resource_properties = '["=", "$node_type", "atom"]'
 
             if resource_properties is not None:
                 reservations[0]['resource_properties'] = resource_properties
