@@ -31,6 +31,7 @@ class OverviewTab(tabs.Tab):
         lease_id = self.tab_group.kwargs['lease_id']
         try:
             lease = blazar.lease_get(self.request, lease_id)
+            #nodes = blazar.reserved_nodes(self.request, lease_id)
         except Exception:
             redirect = reverse('horizon:project:leases:index')
             msg = _('Unable to retrieve lease details.')

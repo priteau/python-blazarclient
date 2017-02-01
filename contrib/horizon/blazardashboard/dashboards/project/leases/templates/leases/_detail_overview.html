@@ -63,4 +63,21 @@
     {% endfor %}
     </dl>
   </div>
+
+    <div class="info detail">
+    <h4>{% trans "Nodes" %}</h4>
+    <hr class="header_rule">
+    <dl>
+    {% for node in nodes %}
+      <dt>{{ node.hostname }}</dt>
+      <dd>
+        <ul>
+          <li><em></em></li>
+        </ul>
+      </dd>
+      {% empty %}
+      <dt>{% trans "No nodes defined." %}</dt>
+    {% endfor %}
+    </dl>
+  </div>
 </div>

@@ -139,3 +139,12 @@ def reservation_calendar(request):
     host_reservations = dictfetchall(cursor)
 
     return host_reservations
+
+def reserved_nodes(request, lease_id):
+    cursor = connections['blazar'].cursor()
+    cursor.execute("""SELECT hypervisor_hostname as hostname FROM computehosts
+    LEFT JOIN computehost_allocations ON computehosts.id = computehost_allocations.compute_host_id
+    LEFT JOIN reservations ON computehost_allocations.reservation_id = reservations.id
+     WHERE computehost_allocations.reservation_id = %s""", [lease_id])
+    reserved_nodes = dictfetchall(cursor)
+    return reserved_nodes
