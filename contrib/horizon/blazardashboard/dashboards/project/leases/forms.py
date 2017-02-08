@@ -112,6 +112,7 @@ class CreateForm(forms.SelfHandlingForm):
             ('fpga', _('FPGA')),
             ('lowpower_xeon', _('Low power Xeon')),
             ('atom', _('Atom')),
+            ('arm64', _('ARM64')),
         )
     )
 
@@ -173,6 +174,9 @@ class CreateForm(forms.SelfHandlingForm):
 
             elif data['node_type'] == 'atom':
                 resource_properties = '["=", "$node_type", "atom"]'
+
+            elif data['node_type'] == 'arm64':
+                resource_properties = '["=", "$node_type", "arm64"]'
 
             if resource_properties is not None:
                 reservations[0]['resource_properties'] = resource_properties
