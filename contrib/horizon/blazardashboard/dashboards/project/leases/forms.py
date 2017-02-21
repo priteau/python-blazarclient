@@ -107,6 +107,7 @@ class CreateForm(forms.SelfHandlingForm):
             ('storage', _('Storage')),
             ('gpu_k80', _('GPU (K80)')),
             ('gpu_m40', _('GPU (M40)')),
+            ('gpu_p100', _('GPU (P100)')),
             ('compute_ib', _('Infiniband Support')),
             ('storage_hierarchy', _('Storage Hierarchy')),
             ('fpga', _('FPGA')),
@@ -157,6 +158,9 @@ class CreateForm(forms.SelfHandlingForm):
             elif data['node_type'] == 'gpu_m40':
                 #resource_properties = '["=", "$gpu.gpu_model", "M40"]'
                 resource_properties = '["=", "$node_type", "gpu_m40"]'
+
+            elif data['node_type'] == 'gpu_p100':
+                resource_properties = '["=", "$node_type", "gpu_p100"]'
 
             elif data['node_type'] == 'storage_hierarchy':
                 #resource_properties = '["=", "$main_memory.ram_size", "549755813888"]'
