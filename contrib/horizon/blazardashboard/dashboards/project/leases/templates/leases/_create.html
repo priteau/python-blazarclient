@@ -1,6 +1,7 @@
 {% extends "horizon/common/_modal_form.html" %}
 {% load i18n %}
 {% load url from future %}
+{% load static %}
 
 {% block form_id %}create_lease{% endblock %}
 {% block form_action %}{% url 'horizon:project:leases:create' %}{% endblock %}
@@ -13,6 +14,8 @@
 .datepicker{z-index:1051!important;}
 </style>
 <div class="left">
+    <input id="django_timezone" type="hidden" value="{{timezone}}" />
+    <div id="timezone" class="alert alert-danger"></div>
     <fieldset>
     {% include "horizon/common/_form_fields.html" %}
     </fieldset>
@@ -53,6 +56,14 @@
             todayHighlight: true,
             autoclose: true
         });
+
+        var timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        var offset = new Date().getTimezoneOffset();
+        var django_timezone = $('#django_timezone').val();
+
+        if (offset != 0 && django_timezone === 'UTC') {
+            $('#timezone').append('Your browser timezone does not appear to be configured to UTC, but your user settings are. Please go to your <a href="{% url 'horizon:settings:user:index' %}">User Settings</a>. if you would like to change this.');
+        }
 
     })(window, horizon, jQuery);
 </script>

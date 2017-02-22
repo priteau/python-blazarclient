@@ -38,6 +38,12 @@ class CreateForm(forms.SelfHandlingForm):
         label=_('Name'),
         widget=forms.TextInput()
     )
+
+    start_date = (datetime.now() + timedelta(minutes=1)).strftime('%Y-%m-%d')
+    start_time = (datetime.now() + timedelta(minutes=1)).strftime('%H:%M')
+    end_date = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
+    end_time = (datetime.now() + timedelta(days=1)).strftime('%H:%M')
+
     start_date = forms.DateTimeField(
         label=_('Start Date'),
         help_text=_('Enter date/with the format Y-M-D'),
@@ -45,7 +51,7 @@ class CreateForm(forms.SelfHandlingForm):
             'invalid': _('Value should be date, formatted Y-M-D'),
         },
         input_formats=['%Y-%m-%d'],
-        widget=forms.DateTimeInput(attrs={'placeholder':'yyyy-mm-dd', 'class':'datepicker'}),
+        widget=forms.DateTimeInput(attrs={'placeholder':start_date, 'class':'datepicker'}),
         required=False,
     )
     start_time = forms.DateTimeField(
@@ -55,7 +61,7 @@ class CreateForm(forms.SelfHandlingForm):
             'invalid': _('Value should be time, formatted h:m (24 hour)'),
         },
         input_formats=['%H:%M'],
-        widget=forms.DateTimeInput(attrs={'placeholder':'hh:mm'}),
+        widget=forms.DateTimeInput(attrs={'placeholder':start_time}),
         required=False,
     )
     end_date = forms.DateTimeField(
@@ -65,7 +71,7 @@ class CreateForm(forms.SelfHandlingForm):
             'invalid': _('Value should be date, formatted Y-M-D'),
         },
         input_formats=['%Y-%m-%d'],
-        widget=forms.DateTimeInput(attrs={'placeholder':'yyyy-mm-dd', 'class':'datepicker'}),
+        widget=forms.DateTimeInput(attrs={'placeholder':end_date, 'class':'datepicker'}),
         required=False,
     )
     end_time = forms.DateTimeField(
@@ -75,7 +81,7 @@ class CreateForm(forms.SelfHandlingForm):
             'invalid': _('Value should be time, formatted h:m (24 hour)'),
         },
         input_formats=['%H:%M'],
-        widget=forms.DateTimeInput(attrs={'placeholder':'hh:mm'}),
+        widget=forms.DateTimeInput(attrs={'placeholder':end_time}),
         required=False,
     )
     resource_type = forms.ChoiceField(
