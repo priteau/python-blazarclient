@@ -39,11 +39,6 @@ class CreateForm(forms.SelfHandlingForm):
         widget=forms.TextInput()
     )
 
-    start_date = (datetime.now() + timedelta(minutes=1)).strftime('%Y-%m-%d')
-    start_time = (datetime.now() + timedelta(minutes=1)).strftime('%H:%M')
-    end_date = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
-    end_time = (datetime.now() + timedelta(days=1)).strftime('%H:%M')
-
     start_date = forms.DateTimeField(
         label=_('Start Date'),
         help_text=_('Enter date/with the format Y-M-D'),
@@ -51,7 +46,7 @@ class CreateForm(forms.SelfHandlingForm):
             'invalid': _('Value should be date, formatted Y-M-D'),
         },
         input_formats=['%Y-%m-%d'],
-        widget=forms.DateTimeInput(attrs={'placeholder':start_date, 'class':'datepicker'}),
+        widget=forms.DateTimeInput(attrs={'placeholder':'Y-M-D', 'class':'datepicker'}),
         required=False,
     )
     start_time = forms.DateTimeField(
@@ -61,7 +56,7 @@ class CreateForm(forms.SelfHandlingForm):
             'invalid': _('Value should be time, formatted h:m (24 hour)'),
         },
         input_formats=['%H:%M'],
-        widget=forms.DateTimeInput(attrs={'placeholder':start_time}),
+        widget=forms.DateTimeInput(attrs={'placeholder':'H:M'}),
         required=False,
     )
     end_date = forms.DateTimeField(
@@ -71,7 +66,7 @@ class CreateForm(forms.SelfHandlingForm):
             'invalid': _('Value should be date, formatted Y-M-D'),
         },
         input_formats=['%Y-%m-%d'],
-        widget=forms.DateTimeInput(attrs={'placeholder':end_date, 'class':'datepicker'}),
+        widget=forms.DateTimeInput(attrs={'placeholder':'Y-M-D', 'class':'datepicker'}),
         required=False,
     )
     end_time = forms.DateTimeField(
@@ -81,7 +76,7 @@ class CreateForm(forms.SelfHandlingForm):
             'invalid': _('Value should be time, formatted h:m (24 hour)'),
         },
         input_formats=['%H:%M'],
-        widget=forms.DateTimeInput(attrs={'placeholder':end_time}),
+        widget=forms.DateTimeInput(attrs={'placeholder':'H:M'}),
         required=False,
     )
     resource_type = forms.ChoiceField(
@@ -127,6 +122,21 @@ class CreateForm(forms.SelfHandlingForm):
 
     def __init__(self, *args, **kwargs):
         super(CreateForm, self).__init__(*args, **kwargs)
+
+        localtz = pytz.timezone(
+            self.request.session.get('django_timezone', self.request.COOKIES.get('django_timezone', 'UTC')))
+        my_now = datetime.now(localtz) + timedelta(minutes=1)
+        start_date = my_now.strftime('%Y-%m-%d')
+        start_time = my_now.strftime('%H:%M')
+
+        end_date = (my_now + timedelta(hours=24)).strftime('%Y-%m-%d')
+        end_time = (my_now + timedelta(hours=24)).strftime('%H:%M')
+
+        self.fields['start_date'].widget.attrs['placeholder'] = start_date + " (" + localtz.zone + ")"
+        self.fields['start_time'].widget.attrs['placeholder'] = start_time + " (" + localtz.zone + ")"
+
+        self.fields['end_date'].widget.attrs['placeholder'] = end_date + " (" + localtz.zone + ")"
+        self.fields['end_time'].widget.attrs['placeholder'] = end_time + " (" + localtz.zone + ")"
 
     def handle(self, request, data):
         try:

@@ -15,7 +15,7 @@
 </style>
 <div class="left">
     <input id="django_timezone" type="hidden" value="{{timezone}}" />
-    <div id="timezone" class="alert alert-danger"></div>
+    <div id="timezone"></div>
     <fieldset>
     {% include "horizon/common/_form_fields.html" %}
     </fieldset>
@@ -63,6 +63,8 @@
 
         if (offset != 0 && django_timezone === 'UTC') {
             $('#timezone').append('Your browser timezone does not appear to be configured to UTC, but your user settings are. Please go to your <a href="{% url 'horizon:settings:user:index' %}">User Settings</a>. if you would like to change this.');
+            $('#timezone').addClass('alert');
+            $('#timezone').addClass('alert-danger');
         }
 
     })(window, horizon, jQuery);
