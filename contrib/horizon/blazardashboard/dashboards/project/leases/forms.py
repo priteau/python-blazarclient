@@ -15,7 +15,7 @@
 
 
 from django.utils.translation import ugettext_lazy as _
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from horizon import exceptions
 from horizon import forms
@@ -38,6 +38,7 @@ class CreateForm(forms.SelfHandlingForm):
         label=_('Name'),
         widget=forms.TextInput()
     )
+
     start_date = forms.DateTimeField(
         label=_('Start Date'),
         help_text=_('Enter date/with the format Y-M-D'),
@@ -45,7 +46,8 @@ class CreateForm(forms.SelfHandlingForm):
             'invalid': _('Value should be date, formatted Y-M-D'),
         },
         input_formats=['%Y-%m-%d'],
-        widget=forms.DateTimeInput(attrs={'placeholder':'yyyy-mm-dd', 'class':'datepicker'}),
+        widget=forms.DateTimeInput(attrs={'placeholder':'Y-M-D', 'class':'datepicker'}),
+        required=False,
     )
     start_time = forms.DateTimeField(
         label=_('Start Time (24 hour)'),
@@ -54,7 +56,8 @@ class CreateForm(forms.SelfHandlingForm):
             'invalid': _('Value should be time, formatted h:m (24 hour)'),
         },
         input_formats=['%H:%M'],
-        widget=forms.DateTimeInput(attrs={'placeholder':'hh:mm'}),
+        widget=forms.DateTimeInput(attrs={'placeholder':'H:M'}),
+        required=False,
     )
     end_date = forms.DateTimeField(
         label=_('End Date'),
@@ -63,7 +66,8 @@ class CreateForm(forms.SelfHandlingForm):
             'invalid': _('Value should be date, formatted Y-M-D'),
         },
         input_formats=['%Y-%m-%d'],
-        widget=forms.DateTimeInput(attrs={'placeholder':'yyyy-mm-dd', 'class':'datepicker'}),
+        widget=forms.DateTimeInput(attrs={'placeholder':'Y-M-D', 'class':'datepicker'}),
+        required=False,
     )
     end_time = forms.DateTimeField(
         label=_('End Time (24 hour)'),
@@ -72,7 +76,8 @@ class CreateForm(forms.SelfHandlingForm):
             'invalid': _('Value should be time, formatted h:m (24 hour)'),
         },
         input_formats=['%H:%M'],
-        widget=forms.DateTimeInput(attrs={'placeholder':'hh:mm'}),
+        widget=forms.DateTimeInput(attrs={'placeholder':'H:M'}),
+        required=False,
     )
     resource_type = forms.ChoiceField(
         label=_('Resource Type'),
@@ -119,6 +124,21 @@ class CreateForm(forms.SelfHandlingForm):
 
     def __init__(self, *args, **kwargs):
         super(CreateForm, self).__init__(*args, **kwargs)
+
+        localtz = pytz.timezone(
+            self.request.session.get('django_timezone', self.request.COOKIES.get('django_timezone', 'UTC')))
+        my_now = datetime.now(localtz) + timedelta(minutes=1)
+        start_date = my_now.strftime('%Y-%m-%d')
+        start_time = my_now.strftime('%H:%M')
+
+        end_date = (my_now + timedelta(hours=24)).strftime('%Y-%m-%d')
+        end_time = (my_now + timedelta(hours=24)).strftime('%H:%M')
+
+        self.fields['start_date'].widget.attrs['placeholder'] = start_date + " (" + localtz.zone + ")"
+        self.fields['start_time'].widget.attrs['placeholder'] = start_time + " (" + localtz.zone + ")"
+
+        self.fields['end_date'].widget.attrs['placeholder'] = end_date + " (" + localtz.zone + ")"
+        self.fields['end_time'].widget.attrs['placeholder'] = end_time + " (" + localtz.zone + ")"
 
     def handle(self, request, data):
         try:
@@ -203,11 +223,33 @@ class CreateForm(forms.SelfHandlingForm):
         # convert dates and times to datetime UTC
         start_date = cleaned_create_data.get("start_date")
         start_time = cleaned_create_data.get("start_time")
+
+        if start_date == '' or start_date == None:
+            start_date = datetime.now() + timedelta(minutes=1)
+
+        if start_time == '' or start_time == None:
+            start_time = datetime.now() + timedelta(minutes=1)
+
+        #logger.debug("start date " + start_date.strftime('%Y-%m-%d'))
+        #logger.debug("start time " + start_time.strftime('%H:%M'))
         start_datetime = self.prepare_datetimes(start_date, start_time)
 
         end_date = cleaned_create_data.get("end_date")
         end_time = cleaned_create_data.get("end_time")
+
+        if end_date == '' or end_date == None:
+            end_date = datetime.now() + timedelta(days=1)
+
+        if end_time == '' or end_time == None:
+            end_time = datetime.now() + timedelta(days=1)
+
+        #logger.debug("End date " + end_date.strftime('%Y-%m-%d'))
+        #logger.debug("End time " + end_time.strftime('%H:%M'))
         end_datetime = self.prepare_datetimes(end_date, end_time)
+
+        logger.debug("Creating lease with default start time of "
+                     + start_date.strftime('%Y-%m-%d') + " " + start_time.strftime('%H:%M')
+                     + " and end time of " + end_date.strftime('%Y-%m-%d') + " " + end_time.strftime('%H:%M'))
 
         if start_datetime < datetime.now(pytz.utc):
             raise forms.ValidationError("Start date must be in the future")

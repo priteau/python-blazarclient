@@ -71,7 +71,9 @@ class CreateView(forms.ModalFormView):
 
     def get_context_data(self, **kwargs):
         context = super(CreateView, self).get_context_data(**kwargs)
-        context['timezone'] = pytz.timezone(self.request.session.get('django_timezone', self.request.COOKIES.get('django_timezone', 'UTC')))
+        tz = pytz.timezone(self.request.session.get('django_timezone', self.request.COOKIES.get('django_timezone', 'UTC')))
+        context['timezone'] = tz
+        context['offset'] = int((pytz.datetime.datetime.now(tz).utcoffset().total_seconds() / 60) * -1)
         return context
 
     def get_success_url(self):

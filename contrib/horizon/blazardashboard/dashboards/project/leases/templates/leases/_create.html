@@ -1,6 +1,7 @@
 {% extends "horizon/common/_modal_form.html" %}
 {% load i18n %}
 {% load url from future %}
+{% load static %}
 
 {% block form_id %}create_lease{% endblock %}
 {% block form_action %}{% url 'horizon:project:leases:create' %}{% endblock %}
@@ -14,14 +15,8 @@
 </style>
 <div class="left">
     <fieldset>
-    {% include "horizon/common/_form_fields.html" %}
-    </fieldset>
-</div>
-<div class="right">
-    <h3>{% trans "Description" %}:</h3>
-    <p>{% trans "Create a new lease with the provided values." %}</p>
-    <div class="alert alert-warning">
-      <h4>Time zone setting</h4>
+        <input id="cookie_offset" type="hidden" value="{{offset}}" />
+    <div class="alert alert-warning" id="timezone">
       <p>
         {% blocktrans %}
         Your timezone is currently configured as <b>{{timezone}}</b>. If you need to update your
@@ -29,15 +24,18 @@
         {% endblocktrans%}
         <a href="{% url 'horizon:settings:user:index' %}">User Settings</a>.
       </p>
-      <p>{% trans "Enter the start and end in your current time zone and they will be converted to UTC." %}</p>
     </div>
-    <div class="alert">
+    {% include "horizon/common/_form_fields.html" %}
+    </fieldset>
+</div>
+<div class="right">
+    <h3>{% trans "Description" %}:</h3>
+    <p>{% trans "Create a new lease with the provided values." %}</p>
       <p>
         For specific node reservations, you can find the node UUID using
         <a href="https://www.chameleoncloud.org/user/discovery">Resource Discovery</a>
         on the user portal.
       </p>
-    </div>
 </div>
 {% endblock %}
 
@@ -53,6 +51,16 @@
             todayHighlight: true,
             autoclose: true
         });
+
+        var timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        var offset = new Date().getTimezoneOffset();
+        var cookie_offset = $('#cookie_offset').val();
+
+        if (cookie_offset != offset) {
+            $('#timezone').show();
+        } else {
+            $('#timezone').hide();
+        }
 
     })(window, horizon, jQuery);
 </script>
