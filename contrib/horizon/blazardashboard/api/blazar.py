@@ -124,6 +124,27 @@ def compute_host_available(request, start_date, end_date):
     count = cursor.fetchone()[0]
     return count
 
+def node_in_lease(request, lease_id):
+    sql = '''\
+    SELECT
+        c.hypervisor_hostname
+    FROM
+        computehost_allocations AS ca
+            JOIN
+        computehosts AS c ON c.id = ca.compute_host_id
+            JOIN
+        reservations AS r ON r.id = ca.reservation_id
+            JOIN
+        leases AS l ON l.id = r.lease_id
+    WHERE l.id = %s
+    '''
+    sql_args = (lease_id,)
+
+    cursor = connections['blazar'].cursor()
+    cursor.execute(sql, sql_args)
+    hypervisor_hostnames = dictfetchall(cursor)
+    return hypervisor_hostnames
+
 def compute_host_list(request):
     """Return a list of compute hosts available for reservation"""
     cursor = connections['blazar'].cursor()

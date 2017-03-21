@@ -63,4 +63,15 @@
     {% endfor %}
     </dl>
   </div>
+
+  <div>
+    <h4>{% trans "Nodes" %}</h4>
+    <hr class="header_rule">
+    <!-- <li><em>{% trans "Node IDs:" %}</em></li> -->
+    <ul>
+      {% for node in nodes %}
+        <li>{{ node.hypervisor_hostname }}</li>
+      {% endfor %}
+    </ul>
+  </div>
 </div>
