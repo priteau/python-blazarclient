@@ -224,41 +224,38 @@ class CreateForm(forms.SelfHandlingForm):
         start_date = cleaned_create_data.get("start_date")
         start_time = cleaned_create_data.get("start_time")
 
-        if start_date == '' or start_date == None:
-            start_date = datetime.now() + timedelta(minutes=1)
-
-        if start_time == '' or start_time == None:
-            start_time = datetime.now() + timedelta(minutes=1)
-
-        #logger.debug("start date " + start_date.strftime('%Y-%m-%d'))
-        #logger.debug("start time " + start_time.strftime('%H:%M'))
-        start_datetime = self.prepare_datetimes(start_date, start_time)
+        if start_time != '' and start_time != None:
+            start_datetime = self.prepare_datetimes(start_date, start_time)
+            logger.debug("Creating lease with start time of "
+                         + start_date.strftime('%Y-%m-%d') + " " + start_time.strftime('%H:%M'))
+        else:
+            start_datetime = None
+            logger.debug("User did not specify start time")
 
         end_date = cleaned_create_data.get("end_date")
         end_time = cleaned_create_data.get("end_time")
 
-        if end_date == '' or end_date == None:
-            end_date = datetime.now() + timedelta(days=1)
+        if end_time != '' and end_time != None:
+            end_datetime = self.prepare_datetimes(end_date, end_time)
+            logger.debug(
+                "Creating lease with end time of " + end_date.strftime('%Y-%m-%d') + " " + end_time.strftime('%H:%M'))
+        else:
+            end_datetime = None
+            logger.debug("User did not specify end time")
 
-        if end_time == '' or end_time == None:
-            end_time = datetime.now() + timedelta(days=1)
-
-        #logger.debug("End date " + end_date.strftime('%Y-%m-%d'))
-        #logger.debug("End time " + end_time.strftime('%H:%M'))
-        end_datetime = self.prepare_datetimes(end_date, end_time)
-
-        logger.debug("Creating lease with default start time of "
-                     + start_date.strftime('%Y-%m-%d') + " " + start_time.strftime('%H:%M')
-                     + " and end time of " + end_date.strftime('%Y-%m-%d') + " " + end_time.strftime('%H:%M'))
-
-        if start_datetime < datetime.now(pytz.utc):
+        if start_datetime != None and start_datetime < datetime.now(pytz.utc):
             raise forms.ValidationError("Start date must be in the future")
 
-        if start_datetime >= end_datetime:
-            raise forms.ValidationError("Start date and time must be before end date and time")
+        if end_datetime != None:
+            if start_datetime != None and start_datetime >= end_datetime:
+                raise forms.ValidationError("Start date and time must be before end date and time")
+            if start_datetime == None and datetime.now(pytz.utc) >= end_datetime:
+                raise forms.ValidationError("End datetime must be in the future")
 
-        cleaned_create_data['start_datetime'] = start_datetime
-        cleaned_create_data['end_datetime'] = end_datetime
+        if start_datetime != None:
+            cleaned_create_data['start_datetime'] = start_datetime
+        if end_datetime != None:
+            cleaned_create_data['end_datetime'] = end_datetime
 
         # check for name conflicts
         leases = api.blazar.lease_list(self.request)
