@@ -228,6 +228,10 @@ class CreateForm(forms.SelfHandlingForm):
             start_datetime = self.prepare_datetimes(start_date, start_time)
             logger.debug("Creating lease with start time of "
                          + start_date.strftime('%Y-%m-%d') + " " + start_time.strftime('%H:%M'))
+
+            # form validation
+            if start_datetime < datetime.now(pytz.utc):
+                raise forms.ValidationError("Start date must be in the future")
         else:
             start_datetime = None
             logger.debug("User did not specify start time")
@@ -239,18 +243,19 @@ class CreateForm(forms.SelfHandlingForm):
             end_datetime = self.prepare_datetimes(end_date, end_time)
             logger.debug(
                 "Creating lease with end time of " + end_date.strftime('%Y-%m-%d') + " " + end_time.strftime('%H:%M'))
-        else:
-            end_datetime = None
-            logger.debug("User did not specify end time")
 
-        if start_datetime != None and start_datetime < datetime.now(pytz.utc):
-            raise forms.ValidationError("Start date must be in the future")
-
-        if end_datetime != None:
+            # form validation
             if start_datetime != None and start_datetime >= end_datetime:
                 raise forms.ValidationError("Start date and time must be before end date and time")
             if start_datetime == None and datetime.now(pytz.utc) >= end_datetime:
                 raise forms.ValidationError("End datetime must be in the future")
+        else:
+            if start_datetime == None:
+                end_datetime = None
+                logger.debug("User did not specify end time")
+            else:
+                end_datetime = start_datetime + timedelta(hours=24)
+                logger.debug("User did not specify end time, set to " + end_datetime.strftime('%Y-%m-%d %H:%M'))
 
         if start_datetime != None:
             cleaned_create_data['start_datetime'] = start_datetime

@@ -20,6 +20,9 @@ from climateclient import exception as blazar_exception
 
 from openstack_dashboard.api import base
 
+from datetime import datetime, timedelta
+import pytz
+
 from django.db import connections
 
 LOG = logging.getLogger(__name__)
@@ -101,6 +104,13 @@ def compute_host_available(request, start_date, end_date):
     Return the number of compute hosts available for reservation for the entire
     specified date range.
     """
+    if start_date == None:
+        start_date = datetime.now(pytz.utc)
+    if end_date == None:
+        if start_date == None:
+            end_date = datetime.now(pytz.utc) + timedelta(hours=24)
+        else:
+            end_date = start_date + timedelta(hours=24)
     start_date_str = start_date.strftime('%Y-%m-%d %H:%M')
     end_date_str = end_date.strftime('%Y-%m-%d %H:%M')
     cursor = connections['blazar'].cursor()
