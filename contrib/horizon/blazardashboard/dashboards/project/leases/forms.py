@@ -143,10 +143,18 @@ class CreateForm(forms.SelfHandlingForm):
     def handle(self, request, data):
         try:
             name = data['name']
-            start_datetime = data['start_datetime']
-            end_datetime = data['end_datetime']
-            start = start_datetime.strftime('%Y-%m-%d %H:%M')
-            end = end_datetime.strftime('%Y-%m-%d %H:%M')
+
+            if 'start_datetime' in data:
+                start_datetime = data['start_datetime']
+                start = start_datetime.strftime('%Y-%m-%d %H:%M')
+            else:
+                start = ''
+
+            if 'end_datetime' in data:
+                end_datetime = data['end_datetime']
+                end = end_datetime.strftime('%Y-%m-%d %H:%M')
+            else:
+                end = ''
 
             reservations = [
                 {
