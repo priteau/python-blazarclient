@@ -219,16 +219,17 @@ class CreateForm(forms.SelfHandlingForm):
 
     def clean(self):
         cleaned_create_data = super(CreateForm, self).clean()
+        localtz = pytz.timezone(self.request.session.get('django_timezone', self.request.COOKIES.get('django_timezone', 'UTC')))
 
         # convert dates and times to datetime UTC
         start_date = cleaned_create_data.get("start_date")
         start_time = cleaned_create_data.get("start_time")
 
         if start_date == '' or start_date == None:
-            start_date = datetime.now() + timedelta(minutes=1)
+            start_date = datetime.now(localtz) + timedelta(minutes=1)
 
         if start_time == '' or start_time == None:
-            start_time = datetime.now() + timedelta(minutes=1)
+            start_time = datetime.now(localtz) + timedelta(minutes=1)
 
         #logger.debug("start date " + start_date.strftime('%Y-%m-%d'))
         #logger.debug("start time " + start_time.strftime('%H:%M'))
@@ -238,10 +239,10 @@ class CreateForm(forms.SelfHandlingForm):
         end_time = cleaned_create_data.get("end_time")
 
         if end_date == '' or end_date == None:
-            end_date = datetime.now() + timedelta(days=1)
+            end_date = datetime.now(localtz) + timedelta(days=1)
 
         if end_time == '' or end_time == None:
-            end_time = datetime.now() + timedelta(days=1)
+            end_time = datetime.now(localtz) + timedelta(days=1)
 
         #logger.debug("End date " + end_date.strftime('%Y-%m-%d'))
         #logger.debug("End time " + end_time.strftime('%H:%M'))
