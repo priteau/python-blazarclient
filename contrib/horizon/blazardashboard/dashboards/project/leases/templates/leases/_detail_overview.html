@@ -70,7 +70,17 @@
     <!-- <li><em>{% trans "Node IDs:" %}</em></li> -->
     <ul>
       {% for node in nodes %}
-        <li>{{ node.hypervisor_hostname }}</li>
+        <li>
+          {% if site %}
+          <a href="https://www.chameleoncloud.org/hardware/node/sites/{{ site }}/clusters/chameleon/nodes/{{ node.hypervisor_hostname }}/">
+          {% endif %}
+
+          {{ node.hypervisor_hostname }}
+
+          {% if site %}
+          </a>
+          {% endif %}
+        </li>
       {% endfor %}
     </ul>
   </div>
