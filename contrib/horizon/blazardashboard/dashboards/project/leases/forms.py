@@ -41,19 +41,19 @@ class CreateForm(forms.SelfHandlingForm):
 
     start_date = forms.DateTimeField(
         label=_('Start Date'),
-        help_text=_('Enter date/with the format Y-M-D'),
+        help_text=_('Enter date with the format YYYY-MM-DD or leave blank for today'),
         error_messages={
-            'invalid': _('Value should be date, formatted Y-M-D'),
+            'invalid': _('Value should be date, formatted YYYY-MM-DD'),
         },
         input_formats=['%Y-%m-%d'],
         widget=forms.DateTimeInput(attrs={'placeholder':'Y-M-D', 'class':'datepicker'}),
         required=False,
     )
     start_time = forms.DateTimeField(
-        label=_('Start Time (24 hour)'),
-        help_text=_('Enter time with the format h:m (24 hour)'),
+        label=_('Start Time'),
+        help_text=_('Enter time with the format HH:MM (24-hour clock) or leave blank for now'),
         error_messages={
-            'invalid': _('Value should be time, formatted h:m (24 hour)'),
+            'invalid': _('Value should be time, formatted HH:MM (24-hour clock)'),
         },
         input_formats=['%H:%M'],
         widget=forms.DateTimeInput(attrs={'placeholder':'H:M'}),
@@ -61,19 +61,19 @@ class CreateForm(forms.SelfHandlingForm):
     )
     end_date = forms.DateTimeField(
         label=_('End Date'),
-        help_text=_('Enter date with the format Y-M-D'),
+        help_text=_('Enter date with the format YYYY-MM-DD or leave blank for tomorrow'),
         error_messages={
-            'invalid': _('Value should be date, formatted Y-M-D'),
+            'invalid': _('Value should be date, formatted YYYY-MM-DD'),
         },
         input_formats=['%Y-%m-%d'],
         widget=forms.DateTimeInput(attrs={'placeholder':'Y-M-D', 'class':'datepicker'}),
         required=False,
     )
     end_time = forms.DateTimeField(
-        label=_('End Time (24 hour)'),
-        help_text=_('Enter time with the format h:m (24 hour)'),
+        label=_('End Time'),
+        help_text=_('Enter time with the format HH:MM (24-hour clock) or leave blank for same time as now'),
         error_messages={
-            'invalid': _('Value should be time, formatted h:m (24 hour)'),
+            'invalid': _('Value should be time, formatted HH:MM (24-hour clock)'),
         },
         input_formats=['%H:%M'],
         widget=forms.DateTimeInput(attrs={'placeholder':'H:M'}),
@@ -134,11 +134,11 @@ class CreateForm(forms.SelfHandlingForm):
         end_date = (my_now + timedelta(hours=24)).strftime('%Y-%m-%d')
         end_time = (my_now + timedelta(hours=24)).strftime('%H:%M')
 
-        self.fields['start_date'].widget.attrs['placeholder'] = start_date + " (" + localtz.zone + ")"
-        self.fields['start_time'].widget.attrs['placeholder'] = start_time + " (" + localtz.zone + ")"
+        self.fields['start_date'].widget.attrs['placeholder'] = "Today"
+        self.fields['start_time'].widget.attrs['placeholder'] = "Now"
 
-        self.fields['end_date'].widget.attrs['placeholder'] = end_date + " (" + localtz.zone + ")"
-        self.fields['end_time'].widget.attrs['placeholder'] = end_time + " (" + localtz.zone + ")"
+        self.fields['end_date'].widget.attrs['placeholder'] = "Tomorrow"
+        self.fields['end_time'].widget.attrs['placeholder'] = "Same time as now"
 
     def handle(self, request, data):
         try:
