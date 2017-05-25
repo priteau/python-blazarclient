@@ -324,5 +324,6 @@ class UpdateForm(forms.SelfHandlingForm):
             api.blazar.lease_update(self.request, lease_id=lease_id, **fields)
             messages.success(request, _("Lease update started."))
             return True
-        except Exception:
-            exceptions.handle(request)
+        except Exception as e:
+            logger.error('Error updating lease: %s', e)
+            exceptions.handle(request, message="An error occurred while updating this lease: %s. Please try again." % e)
