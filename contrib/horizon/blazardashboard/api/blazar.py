@@ -130,13 +130,12 @@ def node_in_lease(request, lease_id):
         c.hypervisor_hostname
     FROM
         computehost_allocations AS ca
-            JOIN
-        computehosts AS c ON c.id = ca.compute_host_id
-            JOIN
-        reservations AS r ON r.id = ca.reservation_id
-            JOIN
-        leases AS l ON l.id = r.lease_id
-    WHERE l.id = %s
+        JOIN computehosts AS c ON c.id = ca.compute_host_id
+        JOIN reservations AS r ON r.id = ca.reservation_id
+        JOIN leases AS l ON l.id = r.lease_id
+    WHERE
+        l.id = %s
+        AND ca.deleted = '0'
     '''
     sql_args = (lease_id,)
 
