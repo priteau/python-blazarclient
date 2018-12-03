@@ -25,6 +25,13 @@ from blazarclient import exception
 
 
 CREATE_RESERVATION_KEYS = {
+    "network": {
+        "name": "",
+        # TODO(priteau): add description
+        "network_properties": "",
+        "resource_properties": "",
+        "resource_type": 'network'
+    },
     "physical:host": {
         "min": "",
         "max": "",
@@ -275,6 +282,8 @@ class CreateLease(command.CreateCommand):
                 defaults = CREATE_RESERVATION_KEYS['physical:host']
             elif "virtual:instance" in res_str:
                 defaults = CREATE_RESERVATION_KEYS['virtual:instance']
+            elif "network" in res_str:
+                defaults = CREATE_RESERVATION_KEYS['network']
             else:
                 defaults = CREATE_RESERVATION_KEYS['others']
 
