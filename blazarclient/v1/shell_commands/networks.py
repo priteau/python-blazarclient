@@ -16,6 +16,7 @@
 import logging
 
 from blazarclient import command
+from blazarclient import exception
 
 
 class ListNetworks(command.ListCommand):
@@ -50,16 +51,22 @@ class CreateNetwork(command.CreateCommand):
     def get_parser(self, prog_name):
         parser = super(CreateNetwork, self).get_parser(prog_name)
         parser.add_argument(
-            'network-type', metavar=self.resource.upper(),
-            help='Type of network segment'
+            '--network-type',
+            help='Type of physical mechanism associated with the network '
+                  'segment. For example: flat, geneve, gre, local, vlan, '
+                  'vxlan.'
         )
         parser.add_argument(
-            'physical-network', metavar=self.resource.upper(),
-            help='Physical network of the network segment'
+            '--physical-network',
+            default=None,
+            help='Name of the physical network in which the network segment '
+                 'is available, required for VLAN networks'
         )
         parser.add_argument(
-            'segment-id', metavar=self.resource.upper(),
-            help='Segment ID to add'
+            '--segment',
+            dest='segment_id',
+            help='VLAN ID for VLAN networks or Tunnel ID for GENEVE/GRE/VXLAN '
+                 'networks'
         )
         parser.add_argument(
             '--extra', metavar='<key>=<value>',
@@ -74,10 +81,27 @@ class CreateNetwork(command.CreateCommand):
         params = {}
         if parsed_args.network_type:
             params['network_type'] = parsed_args.network_type
+        else:
+            raise exception.IncorrectNetwork("--network-type is required")
+
         if parsed_args.physical_network:
-            params['physical_network'] = parsed_args.physical_network
+            if params.get('network_type') == 'vlan':
+                params['physical_network'] = parsed_args.physical_network
+            else:
+                err_msg = "--physical-network is only valid for VLAN segments"
+                raise exception.IncorrectNetwork(err_msg)
+        else:
+            if params.get('network_type') == 'vlan':
+                err_msg = "--physical-network is required for VLAN segments"
+                raise exception.IncorrectNetwork(err_msg)
+            else:
+                params['physical_network'] = None
+
         if parsed_args.segment_id:
             params['segment_id'] = parsed_args.segment_id
+        else:
+            raise exception.IncorrectNetwork("--segment is required")
+
         extras = {}
         if parsed_args.extra_capabilities:
             for capa in parsed_args.extra_capabilities:
